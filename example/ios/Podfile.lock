@@ -1,0 +1,22 @@
+PODS:
+  - duet (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - duet (from `.symlinks/plugins/duet/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  duet:
+    :path: ".symlinks/plugins/duet/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  duet: a1c07b33a14276529c4c3df2f35a299c5ed28f9b
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+
+PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
+
+COCOAPODS: 1.12.0
