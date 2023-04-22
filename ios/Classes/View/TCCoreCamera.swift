@@ -9,7 +9,6 @@
 import UIKit
 import AVFoundation
 
-@available(iOS 10.0, *)
 class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
     typealias VideoCompletion = (URL) -> Void
@@ -225,7 +224,7 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         rootLayer.masksToBounds = true
         previewLayer.frame = CGRect(x: 0, y: 0,
                                     width: UIScreen.main.bounds.width,
-                                    height: UIScreen.main.bounds.height/2)
+                                    height: UIScreen.main.bounds.height - 432)
         rootLayer.insertSublayer(previewLayer, at: 0)
         self.previewLayer = previewLayer
         DispatchQueue(label: "MANHPD2").async {

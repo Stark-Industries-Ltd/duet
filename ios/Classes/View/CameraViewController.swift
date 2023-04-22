@@ -12,7 +12,6 @@ import AVFoundation
 import Photos
 import ReplayKit
 
-@available(iOS 10.0, *)
 class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     
     @IBOutlet private weak var topView: UIView?
@@ -23,11 +22,18 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     @IBOutlet weak var cameraView: UIView!
     
     var isRecording = false
-
+    var fileUrls = [URL]()
     //for screen recording
     let recorder = RPScreenRecorder.shared()
-    
-    var index = 1
+
+    func tempURL() -> URL? {
+        let directory = NSTemporaryDirectory() as NSString
+        if #available(iOS 13.0, *), directory != "" {
+            let path = directory.appendingPathComponent("\(NSDate.now).mp4")
+            return URL(fileURLWithPath: path)
+        }
+        return nil
+    }
 
     @IBAction private func recordingButton(_ sender: UIButton) {
         guard let cameraManager = self.cameraManager else { return }
@@ -35,80 +41,44 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             cameraManager.stopRecording()
             self.setupStartButton()
             player?.pause()
-            recorder.isMicrophoneEnabled = false
-            recorder.stopRecording { preview, error in
-                if let unwrappedPreview = preview {
-                    unwrappedPreview.previewControllerDelegate = self
-                    self.present(unwrappedPreview, animated: true, completion: nil)
+            let outputURL = tempURL()
+            guard let outputURL = outputURL else {
+                return
+            }
+            if #available(iOS 14.0, *) {
+                recorder.isMicrophoneEnabled = false
+                recorder.stopRecording(withOutput: outputURL) { (error) in
+                    guard error == nil else {
+                        print("Failed to save ")
+                        return
+                    }
+                    print("save")
+                    self.fileUrls.append(outputURL)
                 }
+            } else {
+                // Fallback on earlier versions
             }
         } else {
             cameraManager.startRecording()
             self.setupStopButton()
-            player?.play()
-            //            DispatchQueue(label: "ManhDZ").async {
-            //                self.recordUIView()
-            //            }
             recorder.isMicrophoneEnabled = true
             recorder.startRecording { error in
                 if let unwrappedError = error {
                     print(unwrappedError.localizedDescription)
                 }
-                // Làm điều gì bạn muốn sau khi bạn đã đồng ý để record
+                self.player?.play()
             }
         }
     }
 
     var writer: AVAssetWriter?
-
-//    func recordUIView() {
-//        //_______________
-//        // Create an instance of AVCaptureSession
-//        let session = AVCaptureSession()
-//        session.sessionPreset = .high
-//
-//        // Add a AVCaptureVideoDataOutput instance to the session
-//        let output = AVCaptureVideoDataOutput()
-//        let queue = DispatchQueue(label: "videoQueue")
-//        output.setSampleBufferDelegate(self, queue: queue)
-//        output.videoSettings = [
-//            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
-//            kCVPixelBufferWidthKey as String: 394, //"kCVPixelBufferWidthKey as String: UIScreen.main.bounds.size.width",
-//            kCVPixelBufferHeightKey as String: UIScreen.main.bounds.size.height
-//        ]
-//        session.addOutput(output)
-//
-//        // Create an instance of AVAssetWriter
-//        let fileURL = URL(fileURLWithPath: NSTemporaryDirectory() + "video.mp4")
-//        writer = try! AVAssetWriter(outputURL: fileURL, fileType: .mp4)
-//
-//        // Create an instance of AVAssetWriterInput
-//        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
-//            AVVideoCodecKey: AVVideoCodecH264,
-//            AVVideoWidthKey: UIScreen.main.bounds.size.width,
-//            AVVideoHeightKey: UIScreen.main.bounds.size.height
-//        ])
-//        input.expectsMediaDataInRealTime = true
-//        writer?.add(input)
-//
-//        //        // Create a CADisplayLink instance
-//        //        let displayLink = CADisplayLink(target: self, selector: #selector(self.captureFrame(_:)))
-//        //        displayLink.add(to: .current, forMode: .default)
-//
-//        // Start the AVCaptureSession
-//        session.startRunning()
-//        writer?.startWriting()
-//        //_______________
-//    }
-
     var player: AVPlayer?
 
     private func playVideo() {
-//        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
-//            debugPrint("video.m4v not found")
-//            return
-//        }
-        let path = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+            debugPrint("video.m4v not found")
+            return
+        }
         //2. Create AVPlayer object
         let asset = AVAsset(url: URL(fileURLWithPath: path))
         let size = asset.videoSize()
@@ -118,9 +88,13 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         let withScreen = UIScreen.main.bounds.width
         //3. Create AVPlayerLayer object
         let playerLayer = AVPlayerLayer(player: player)
+
+        print(ratio)
+        print(withScreen)
+        print(withScreen * ratio)
         playerLayer.frame = CGRect(x: 0, y: 0,
                                    width: withScreen,
-                                   height: ratio * withScreen)
+                                   height: withScreen * ratio)
         //bounds of the view in which AVPlayer should be displayed
         //        playerLayer.videoGravity = .resizeAspectFill
 
@@ -128,36 +102,33 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         self.videoView.layer.addSublayer(playerLayer)
         
         let audioSession = AVAudioSession.sharedInstance()
-            
-            //Executed right before playing avqueueplayer media
-            do {
-                try audioSession.setCategory(.playAndRecord, options: .defaultToSpeaker)
-                try audioSession.setActive(true)
-            } catch {
-                fatalError("Error Setting Up Audio Session")
-            }
 
-
-            //Executed right after avqueueplayer finishes media
-//            do {
-//                try audioSession.setCategory(.recording, options: [.allowBluetooth])
-//                try audioSession.setActive(true)
-//            } catch {
-//                fatalError("Error Setting Up Audio Session")
-//            }
-
-        //5. Play Video
-        //        player.play()
-        //            let player = AVPlayer(url: URL(fileURLWithPath: path))
-        //            let playerController = AVPlayerViewController()
-        //            playerController.player = player
-        //            present(playerController, animated: true) {
-        //                player.play()
-        //            }
+        //Executed right before playing avqueueplayer media
+        do {
+            try audioSession.setCategory(.playAndRecord, options: .defaultToSpeaker)
+            try audioSession.setActive(true)
+        } catch {
+            fatalError("Error Setting Up Audio Session")
+        }
     }
 
     @IBAction private func flipButtonPressed(_ button: UIButton) {
-        //        self.cameraManager?.flip()
+        let assets = self.fileUrls.compactMap { url in
+            if (try? url.checkResourceIsReachable()) == true {
+                return AVAsset(url: url)
+            }
+            return nil
+        }
+        KVVideoManager.shared.merge(arrayVideos: assets) { fileURL, error in
+            print("Merge video error: \(error)")
+            if let fileURL = fileURL {
+                let avPlayer = AVPlayerViewController()
+                avPlayer.player = AVPlayer(url: fileURL)
+                self.present(avPlayer, animated: true) {
+                    avPlayer.player?.play()
+                }
+            }
+        }
     }
     
     private var cameraManager: TCCoreCamera?
@@ -249,7 +220,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     }
 }
 
-@available(iOS 10.0, *)
 extension CameraViewController: RPPreviewViewControllerDelegate {
     func previewControllerDidFinish(_ previewController: RPPreviewViewController) {
         dismiss(animated: true)
@@ -273,4 +243,11 @@ extension AVAsset {
         return CGSize(width: 0, height: 0)
     }
 
+}
+extension URL {
+    static var documents: URL {
+        return FileManager
+            .default
+            .urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
 }

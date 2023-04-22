@@ -20,23 +20,16 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z10-b7-IoT">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <subviews>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rAl-hh-thJ">
-                                        <rect key="frame" x="0.0" y="367" width="375" height="300"/>
-                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="300" id="msF-a7-BJr"/>
-                                        </constraints>
-                                    </view>
-                                </subviews>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rAl-hh-thJ">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="432"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="rAl-hh-thJ" secondAttribute="trailing" id="XK7-iY-pWW"/>
-                                    <constraint firstAttribute="bottom" secondItem="rAl-hh-thJ" secondAttribute="bottom" id="heG-4T-o9L"/>
-                                    <constraint firstItem="rAl-hh-thJ" firstAttribute="leading" secondItem="z10-b7-IoT" secondAttribute="leading" id="qhx-aj-xEL"/>
+                                    <constraint firstAttribute="height" constant="432" id="HLg-lt-5p6"/>
                                 </constraints>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z10-b7-IoT">
+                                <rect key="frame" x="0.0" y="432" width="375" height="235"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PyD-nP-HEi">
                                 <rect key="frame" x="155.5" y="587" width="64" height="64"/>
@@ -77,15 +70,18 @@
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="z10-b7-IoT" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="32k-7N-aRH"/>
+                            <constraint firstItem="rAl-hh-thJ" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="36F-AV-DNd"/>
                             <constraint firstItem="PyD-nP-HEi" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="51f-fD-jwA"/>
-                            <constraint firstItem="z10-b7-IoT" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="6UN-UO-YwF"/>
+                            <constraint firstItem="z10-b7-IoT" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="83g-Ie-fO8"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="z10-b7-IoT" secondAttribute="bottom" id="83i-D4-h4R"/>
                             <constraint firstItem="Lp3-Ny-3pM" firstAttribute="bottom" secondItem="PyD-nP-HEi" secondAttribute="bottom" id="BH8-jN-C50"/>
+                            <constraint firstItem="z10-b7-IoT" firstAttribute="top" secondItem="rAl-hh-thJ" secondAttribute="bottom" id="BZq-3P-Hsc"/>
+                            <constraint firstItem="rAl-hh-thJ" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="GJm-MM-Dgu"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="PyD-nP-HEi" secondAttribute="bottom" constant="16" id="Im2-E4-vck"/>
-                            <constraint firstAttribute="trailing" secondItem="z10-b7-IoT" secondAttribute="trailing" id="KYQ-Hl-qTj"/>
+                            <constraint firstAttribute="trailing" secondItem="z10-b7-IoT" secondAttribute="trailing" id="JXf-9B-2Lk"/>
                             <constraint firstItem="Lp3-Ny-3pM" firstAttribute="leading" secondItem="PyD-nP-HEi" secondAttribute="leading" id="dnV-db-4u6"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="z10-b7-IoT" secondAttribute="bottom" id="mV6-YY-RsS"/>
                             <constraint firstItem="Lp3-Ny-3pM" firstAttribute="trailing" secondItem="PyD-nP-HEi" secondAttribute="trailing" id="pkB-Rf-VG2"/>
+                            <constraint firstAttribute="trailing" secondItem="rAl-hh-thJ" secondAttribute="trailing" id="s25-yU-GrV"/>
                             <constraint firstItem="Lp3-Ny-3pM" firstAttribute="top" secondItem="PyD-nP-HEi" secondAttribute="top" id="x76-aa-yaN"/>
                         </constraints>
                     </view>
