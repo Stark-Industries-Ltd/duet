@@ -21,6 +21,9 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     @IBOutlet weak var videoView: UIView!
     @IBOutlet weak var cameraView: UIView!
     
+    
+    @IBOutlet weak var image: UIImageView!
+    
     var isRecording = false
     var fileUrls = [URL]()
     //for screen recording
@@ -41,33 +44,34 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             cameraManager.stopRecording()
             self.setupStartButton()
             player?.pause()
-            let outputURL = tempURL()
-            guard let outputURL = outputURL else {
-                return
-            }
-            if #available(iOS 14.0, *) {
-                recorder.isMicrophoneEnabled = false
-                recorder.stopRecording(withOutput: outputURL) { (error) in
-                    guard error == nil else {
-                        print("Failed to save ")
-                        return
-                    }
-                    print("save")
-                    self.fileUrls.append(outputURL)
-                }
-            } else {
-                // Fallback on earlier versions
-            }
+//            let outputURL = tempURL()
+//            guard let outputURL = outputURL else {
+//                return
+//            }
+//            if #available(iOS 14.0, *) {
+//                recorder.isMicrophoneEnabled = false
+//                recorder.stopRecording(withOutput: outputURL) { (error) in
+//                    guard error == nil else {
+//                        print("Failed to save ")
+//                        return
+//                    }
+//                    print("save")
+//                    self.fileUrls.append(outputURL)
+//                }
+//            } else {
+//                // Fallback on earlier versions
+//            }
         } else {
             cameraManager.startRecording()
             self.setupStopButton()
-            recorder.isMicrophoneEnabled = true
-            recorder.startRecording { error in
-                if let unwrappedError = error {
-                    print(unwrappedError.localizedDescription)
-                }
-                self.player?.play()
-            }
+            self.player?.play()
+//            recorder.isMicrophoneEnabled = true
+//            recorder.startRecording { error in
+//                if let unwrappedError = error {
+//                    print(unwrappedError.localizedDescription)
+//                }
+//                self.player?.play()
+//            }
         }
     }
 
@@ -154,9 +158,35 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         super.viewDidAppear(animated)
         self.cameraManager = TCCoreCamera(view: self.cameraView)
         self.cameraManager?.videoCompletion = { (fileURL) in
-            self.saveInPhotoLibrary(with: fileURL)
+//            self.saveInPhotoLibrary(with: fileURL)
             print("finished writing to \(fileURL.absoluteString)")
-        }
+            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+                debugPrint("video.m4v not found")
+                return
+            }
+            let url = URL(fileURLWithPath: path)
+            DispatchQueue.main.async {
+                DPVideoMerger().gridMergeVideos(withFileURLs: [url,fileURL], videoResolution: CGSize(width: self.view.frame.width, height: self.view.frame.height - UIApplication.shared.statusBarFrame.height), completion: {(_ mergedVideoFile: URL?, _ error: Error?) -> Void in
+                                if error != nil {
+                                    let errorMessage = "Could not merge videos: \(error?.localizedDescription ?? "error")"
+                                    let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
+                                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (a) in
+                                    }))
+                                    self.present(alert, animated: true) {() -> Void in }
+                                    return
+                                }
+    //                            let objAVPlayerVC = AVPlayerViewController()
+    //                            objAVPlayerVC.player = AVPlayer(url: mergedVideoFile!)
+                                self.saveInPhotoLibrary(with: mergedVideoFile!)
+    //                            self.present(objAVPlayerVC, animated: true, completion: {() -> Void in
+    //                                objAVPlayerVC.player?.play()
+    //                            })
+                            })
+            }
+            }
+            
+//            self.hstackVideos(videoPaths: [fileURL.absoluteString, url.absoluteString])
+            
         self.cameraManager?.photoCompletion = { [weak self] (image) in
             do {
                 try PHPhotoLibrary.shared().performChangesAndWait {
@@ -172,11 +202,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     
     @objc private func zoomingGesture(gesture: UIPanGestureRecognizer) {
         let velocity = gesture.velocity(in: self.view)
-        if velocity.y > 0 {
-            self.cameraManager?.zoomOut()
-        } else {
-            self.cameraManager?.zoomIn()
-        }
     }
     private func setupStartButton() {
         self.topView?.backgroundColor = UIColor.clear
