@@ -10,7 +10,6 @@ import UIKit
 import AVKit
 import AVFoundation
 import Photos
-import ReplayKit
 
 class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     
@@ -23,7 +22,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
     private var cameraManager: TCCoreCamera?
     private var fileUrls = [URL]()
-    private let recorder = RPScreenRecorder.shared()
     private var writer: AVAssetWriter?
     private var player: AVPlayer?
 
@@ -60,13 +58,10 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         let playerItem = AVPlayerItem(asset: asset)
         let ratio =  size.height/size.width
         self.player = AVPlayer(playerItem: playerItem)
-        let withScreen = UIScreen.main.bounds.width
         //3. Create AVPlayerLayer object
         let playerLayer = AVPlayerLayer(player: player)
-
-        print(ratio)
-        print(withScreen)
-        print(withScreen * ratio)
+        
+        let withScreen = UIScreen.main.bounds.width
         heightContraintVideo.constant = withScreen * ratio
 
         playerLayer.frame = CGRect(x: 0, y: 0,
@@ -85,27 +80,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             fatalError("Error Setting Up Audio Session")
         }
     }
-
-    @IBAction private func flipButtonPressed(_ button: UIButton) {
-        let assets = self.fileUrls.compactMap { url in
-            if (try? url.checkResourceIsReachable()) == true {
-                return AVAsset(url: url)
-            }
-            return nil
-        }
-        KVVideoManager.shared.merge(arrayVideos: assets) { fileURL, error in
-            print("Merge video error: \(error)")
-            if let fileURL = fileURL {
-                let avPlayer = AVPlayerViewController()
-                avPlayer.player = AVPlayer(url: fileURL)
-                self.present(avPlayer, animated: true) {
-                    avPlayer.player?.play()
-                }
-            }
-        }
-    }
-    
-
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -132,31 +106,31 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
                 return
             }
             let url = URL(fileURLWithPath: path)
+            
             DispatchQueue.main.async {
-                DPVideoMerger().gridMergeVideos(withFileURLs: [url,fileURL], videoResolution: CGSize(width: self.view.frame.width, height: self.view.frame.height - UIApplication.shared.statusBarFrame.height), completion: {(_ mergedVideoFile: URL?, _ error: Error?) -> Void in
-                    if error != nil {
-                        let errorMessage = "Could not merge videos: \(error?.localizedDescription ?? "error")"
-                        let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (a) in
-                        }))
-                        self.present(alert, animated: true) {() -> Void in }
-                        return
+                DPVideoMerger().gridMergeVideos(
+                    withFileURLs: [url,fileURL],
+                    videoResolution: CGSize(
+                        width: self.view.frame.width,
+                        height: self.view.frame.height - UIApplication.shared.statusBarFrame.height
+                    ),
+                    completion: {
+                        (_ mergedVideoFile: URL?, _ error: Error?) -> Void in
+                        if error != nil {
+                            let errorMessage = "Could not merge videos: \(error?.localizedDescription ?? "error")"
+                            let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
+                            alert.addAction( UIAlertAction( title: "OK", style: .default, handler: { (a) in } ) )
+                            
+                            self.present(alert, animated: true) {() -> Void in }
+                            return
+                        }
+                        
+                        self.saveInPhotoLibrary(with: mergedVideoFile!)
                     }
-                    self.saveInPhotoLibrary(with: mergedVideoFile!)
-                })
+                )
             }
         }
-
-        self.cameraManager?.photoCompletion = { [weak self] (image) in
-            do {
-                try PHPhotoLibrary.shared().performChangesAndWait {
-                    PHAssetChangeRequest.creationRequestForAsset(from: image)
-                }
-                self?.setupStartButton()
-            } catch {
-                print(error.localizedDescription)
-            }
-        }
+        
         self.cameraManager?.camereType = .video
     }
 
@@ -199,12 +173,6 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
                 print(error.debugDescription)
             }
         }
-    }
-}
-
-extension CameraViewController: RPPreviewViewControllerDelegate {
-    func previewControllerDidFinish(_ previewController: RPPreviewViewController) {
-        dismiss(animated: true)
     }
 }
 

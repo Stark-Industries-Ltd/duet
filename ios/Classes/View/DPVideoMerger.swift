@@ -211,6 +211,7 @@ extension DPVideoMerger : VideoMerger {
             }
         }
         if isError == false {
+            print("HAU1")
             exportMergedVideo(instructions, highestFrameRate, videoSize, composition, videoQuality, completion)
         }
     }
@@ -238,7 +239,7 @@ extension DPVideoMerger : VideoMerger {
         isRepeatAudio: Bool = false,
         isAudio: Bool = true,
         videoDuration: Int = -1,
-        videoQuality: String = AVAssetExportPresetMediumQuality,
+        videoQuality: String = AVAssetExportPresetHighestQuality,
         completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
         if videoFileURLs.count <= 1 {
             DispatchQueue.main.async { completion(nil, self.videoMoreThenOneError()) }
@@ -421,7 +422,7 @@ extension DPVideoMerger : VideoMerger {
         isRepeatVideo: Bool = false,
         isRepeatAudio: Bool = false,
         videoDuration: Int = -1,
-        videoQuality: String = AVAssetExportPresetMediumQuality,
+        videoQuality: String = AVAssetExportPresetHighestQuality,
         alignment: ParallelMergeAlignment = .vertical,
         completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
         
