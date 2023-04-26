@@ -31,7 +31,7 @@ struct TextData {
 class KVVideoManager {
     static let shared = KVVideoManager()
 
-    let defaultSize = CGSize(width: 720, height: 1280) // Default video size
+//    let defaultSize = CGSize(width: 720, height: 1280) // Default video size
     var videoDuration = 30.0 // Duration of output video when merging videos & images
     var imageDuration = 5.0 // Duration of each image
 
@@ -54,7 +54,7 @@ class KVVideoManager {
     //
     // Add background music to video
     //
-    func merge(video:AVAsset, withBackgroundMusic music:AVAsset, completion:@escaping Completion) -> Void {
+    func merge(video: AVAsset, withBackgroundMusic music: AVAsset, completion:@escaping Completion) -> Void {
         // Init composition
         let mixComposition = AVMutableComposition()
         var arrayLayerInstructions:[AVMutableVideoCompositionLayerInstruction] = []
@@ -98,7 +98,7 @@ class KVVideoManager {
 
             // Add instruction for video track
             if let videoCompositionTrack = videoCompositionTrack {
-                let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: video, targetSize: defaultSize)
+                let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: video, targetSize: video.videoSize())
                 arrayLayerInstructions.append(layerInstruction)
             }
 
@@ -124,7 +124,7 @@ class KVVideoManager {
         let mainComposition = AVMutableVideoComposition()
         mainComposition.instructions = [mainInstruction]
         mainComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-        mainComposition.renderSize = defaultSize
+        mainComposition.renderSize = video.videoSize()
 
         // Init exporter
         let exporter = AVAssetExportSession(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
@@ -144,16 +144,17 @@ class KVVideoManager {
     private func doMerge(arrayVideos:[AVAsset], animation:Bool, completion:@escaping Completion) -> Void {
         var insertTime = CMTime.zero
         var arrayLayerInstructions:[AVMutableVideoCompositionLayerInstruction] = []
+        var renderSize = arrayVideos.first?.videoSize() ?? CGSize(width: 720, height: 1280)
 
         // Silence sound (in case video has no sound track)
-        guard let silenceURL = Bundle.main.url(forResource: "silence", withExtension: "mp3") else {
-            print("Missing resource")
-            completion(nil, nil)
-            return
-        }
+//        guard let silenceURL = Bundle.main.url(forResource: "silence", withExtension: "mp3") else {
+//            print("Missing resource")
+//            completion(nil, nil)
+//            return
+//        }
 
-        let silenceAsset = AVAsset(url:silenceURL)
-        let silenceSoundTrack = silenceAsset.tracks(withMediaType: AVMediaType.audio).first
+//        let silenceAsset = AVAsset(url:silenceURL)
+//        let silenceSoundTrack = silenceAsset.tracks(withMediaType: AVMediaType.audio).first
 
         // Init composition
         let mixComposition = AVMutableComposition()
@@ -163,13 +164,13 @@ class KVVideoManager {
             guard let videoTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first else { continue }
 
             // Get audio track
-            var audioTrack:AVAssetTrack?
+            var audioTrack: AVAssetTrack?
             if videoAsset.tracks(withMediaType: AVMediaType.audio).count > 0 {
                 audioTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
             }
-            else {
-                audioTrack = silenceSoundTrack
-            }
+//            else {
+//                audioTrack = silenceSoundTrack
+//            }
 
             // Init video & audio composition track
             let videoCompositionTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.video,
@@ -196,7 +197,7 @@ class KVVideoManager {
 
                 // Add instruction for video track
                 if let videoCompositionTrack = videoCompositionTrack {
-                    let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: videoAsset, targetSize: defaultSize)
+                    let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: videoAsset, targetSize: renderSize)
 
                     // Hide video track before changing to new track
                     let endTime = CMTimeAdd(insertTime, duration)
@@ -230,7 +231,7 @@ class KVVideoManager {
         let mainComposition = AVMutableVideoComposition()
         mainComposition.instructions = [mainInstruction]
         mainComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-        mainComposition.renderSize = defaultSize
+        mainComposition.renderSize = renderSize
 
         // Export to file
         let path = NSTemporaryDirectory().appending("mergedVideo.mp4")
@@ -240,222 +241,6 @@ class KVVideoManager {
         FileManager.default.removeItemIfExisted(exportURL)
 
         // Init exporter
-        let exporter = AVAssetExportSession.init(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
-        exporter?.outputURL = exportURL
-        exporter?.outputFileType = AVFileType.mp4
-        exporter?.shouldOptimizeForNetworkUse = true
-        exporter?.videoComposition = mainComposition
-
-        // Do export
-        exporter?.exportAsynchronously(completionHandler: {
-            DispatchQueue.main.async {
-                self.exportDidFinish(exporter: exporter, videoURL: exportURL, completion: completion)
-            }
-        })
-    }
-
-    //
-    // Merge videos & images
-    //
-    func makeVideoFrom(data:[VideoData], textData:[TextData]?, completion:@escaping Completion) -> Void {
-        var insertTime = CMTime.zero
-        var arrayLayerInstructions:[AVMutableVideoCompositionLayerInstruction] = []
-        var arrayLayerImages:[CALayer] = []
-
-        // Black background video
-        guard let bgVideoURL = Bundle.main.url(forResource: "black", withExtension: "mov") else {
-            print("Need black background video !")
-            completion(nil,nil)
-            return
-        }
-
-        let bgVideoAsset = AVAsset(url: bgVideoURL)
-        guard let bgVideoTrack = bgVideoAsset.tracks(withMediaType: AVMediaType.video).first else {
-            print("Need black background video !")
-            completion(nil,nil)
-            return
-        }
-
-        // Silence sound (in case video has no sound track)
-        guard let silenceURL = Bundle.main.url(forResource: "silence", withExtension: "mp3") else {
-            print("Missing resource")
-            completion(nil, nil)
-            return
-        }
-
-        let silenceAsset = AVAsset(url:silenceURL)
-        let silenceSoundTrack = silenceAsset.tracks(withMediaType: AVMediaType.audio).first
-
-        // Init composition
-        let mixComposition = AVMutableComposition()
-
-        // Merge
-        for videoData in data {
-            if videoData.isVideo {
-                guard let videoAsset = videoData.asset else { continue }
-
-                // Get video track
-                guard let videoTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first else { continue }
-
-                // Get audio track
-                var audioTrack:AVAssetTrack?
-                if videoAsset.tracks(withMediaType: AVMediaType.audio).count > 0 {
-                    audioTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
-                }
-                else {
-                    audioTrack = silenceSoundTrack
-                }
-
-                // Init video & audio composition track
-                let videoCompositionTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.video,
-                                                                           preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-
-                let audioCompositionTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio,
-                                                                           preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-
-                do {
-                    let startTime = CMTime.zero
-                    let duration = videoAsset.duration
-
-                    // Add video track to video composition at specific time
-                    try videoCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
-                                                              of: videoTrack,
-                                                              at: insertTime)
-
-                    // Add audio track to audio composition at specific time
-                    if let audioTrack = audioTrack {
-                        try audioCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: startTime, duration: duration),
-                                                                  of: audioTrack,
-                                                                  at: insertTime)
-                    }
-
-                    // Add instruction for video track
-                    if let videoCompositionTrack = videoCompositionTrack {
-                        let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: videoAsset, targetSize: defaultSize)
-
-                        // Hide video track before changing to new track
-                        let endTime = CMTimeAdd(insertTime, duration)
-                        let durationAnimation = 1.0.toCMTime()
-
-                        layerInstruction.setOpacityRamp(fromStartOpacity: 1.0, toEndOpacity: 0.0, timeRange: CMTimeRange.init(start: endTime, duration: durationAnimation))
-
-                        arrayLayerInstructions.append(layerInstruction)
-                    }
-
-                    // Increase the insert time
-                    insertTime = CMTimeAdd(insertTime, duration)
-                }
-                catch {
-                    print("Load track error")
-                }
-            }
-            else { // Image
-                let videoCompositionTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.video,
-                                                                           preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-
-                let audioCompositionTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio,
-                                                                           preferredTrackID: Int32(kCMPersistentTrackID_Invalid))
-
-                let itemDuration = imageDuration.toCMTime()
-
-                do {
-                    try videoCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: CMTime.zero, duration: itemDuration),
-                                                              of: bgVideoTrack,
-                                                              at: insertTime)
-
-                    // Add audio track to audio composition at specific time
-                    if let audioTrack = silenceSoundTrack {
-                        try audioCompositionTrack?.insertTimeRange(CMTimeRangeMake(start: CMTime.zero, duration: itemDuration),
-                                                                  of: audioTrack,
-                                                                  at: insertTime)
-                    }
-                }
-                catch {
-                    print("Load background track error")
-                }
-
-                // Create Image layer
-                guard let image = videoData.image else { continue }
-
-                let imageLayer = CALayer()
-                imageLayer.frame = CGRect.init(origin: CGPoint.zero, size: defaultSize)
-                imageLayer.contents = image.cgImage
-                imageLayer.opacity = 0
-                imageLayer.contentsGravity = CALayerContentsGravity.resizeAspectFill
-
-                setOrientation(image: image, onLayer: imageLayer, outputSize: defaultSize)
-
-                // Add Fade in & Fade out animation
-                let fadeInAnimation = CABasicAnimation.init(keyPath: "opacity")
-                fadeInAnimation.duration = 1
-                fadeInAnimation.fromValue = NSNumber(value: 0)
-                fadeInAnimation.toValue = NSNumber(value: 1)
-                fadeInAnimation.isRemovedOnCompletion = false
-                fadeInAnimation.beginTime = insertTime.seconds == 0 ? 0.05: insertTime.seconds
-                fadeInAnimation.fillMode = CAMediaTimingFillMode.forwards
-                imageLayer.add(fadeInAnimation, forKey: "opacityIN")
-
-                let fadeOutAnimation = CABasicAnimation.init(keyPath: "opacity")
-                fadeOutAnimation.duration = 1
-                fadeOutAnimation.fromValue = NSNumber(value: 1)
-                fadeOutAnimation.toValue = NSNumber(value: 0)
-                fadeOutAnimation.isRemovedOnCompletion = false
-                fadeOutAnimation.beginTime = CMTimeAdd(insertTime, itemDuration).seconds
-                fadeOutAnimation.fillMode = CAMediaTimingFillMode.forwards
-                imageLayer.add(fadeOutAnimation, forKey: "opacityOUT")
-
-                arrayLayerImages.append(imageLayer)
-
-                // Increase the insert time
-                insertTime = CMTimeAdd(insertTime, itemDuration)
-            }
-        }
-
-        // Init Video layer
-        let videoLayer = CALayer()
-        videoLayer.frame = CGRect(x: 0, y: 0, width: defaultSize.width, height: defaultSize.height)
-
-        let parentlayer = CALayer()
-        parentlayer.frame = CGRect(x: 0, y: 0, width: defaultSize.width, height: defaultSize.height)
-        parentlayer.addSublayer(videoLayer)
-
-        // Add Image layers
-        for layer in arrayLayerImages {
-            parentlayer.addSublayer(layer)
-        }
-
-        // Add Text layer
-        if let textData = textData {
-            for aTextData in textData {
-                let textLayer = makeTextLayer(string: aTextData.text,
-                                              fontSize: aTextData.fontSize,
-                                              textColor: UIColor.green,
-                                              frame: aTextData.textFrame,
-                                              showTime: aTextData.showTime,
-                                              hideTime: aTextData.endTime)
-                parentlayer.addSublayer(textLayer)
-            }
-        }
-
-        // Main video composition instruction
-        let mainInstruction = AVMutableVideoCompositionInstruction()
-        mainInstruction.timeRange = CMTimeRangeMake(start: CMTime.zero, duration: insertTime)
-        mainInstruction.layerInstructions = arrayLayerInstructions
-
-        // Main video composition
-        let mainComposition = AVMutableVideoComposition()
-        mainComposition.instructions = [mainInstruction]
-        mainComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-        mainComposition.renderSize = defaultSize
-        mainComposition.animationTool = AVVideoCompositionCoreAnimationTool(postProcessingAsVideoLayer: videoLayer, in: parentlayer)
-
-        // Export to file
-        let path = NSTemporaryDirectory().appending("mergedVideo.mp4")
-        let exportURL = URL.init(fileURLWithPath: path)
-
-        // Remove file if existed
-        FileManager.default.removeItemIfExisted(exportURL)
-
         let exporter = AVAssetExportSession.init(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
         exporter?.outputURL = exportURL
         exporter?.outputFileType = AVFileType.mp4

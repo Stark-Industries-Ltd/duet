@@ -13,12 +13,7 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
                     AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
     typealias VideoCompletion = (URL) -> Void
     typealias PhotoCompletion = (UIImage) -> Void
-    
-    public enum CameraType {
-        case photo
-        case video
-    }
-    
+
     public enum CameraPosition {
         case front
         case back
@@ -38,7 +33,6 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     private var deviceInput: AVCaptureDeviceInput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var assetWriter: AVAssetWriter?
-    private var recordingURL: URL?
     private(set) var isRecording: Bool = false
     private var isRecordingSessionStarted: Bool = false
     private(set) var cameraPosition: CameraPosition = .back
@@ -60,19 +54,16 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     
     open var videoCompletion: VideoCompletion?
     open var photoCompletion: PhotoCompletion?
-    open var camereType: CameraType = .photo {
-        didSet {
-            self.updateFileStorage(with: self.camereType)
-        }
-    }
-    
+
     open var maxZoomFactor: CGFloat = 10.0
-    
-    var kStreamSize : CGSize
-    
+    private var recoderNummber = 0
+    private let fileManager = FileManager()
+    private var fileURL: URL {
+        return URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/video\(self.recoderNummber).mp4")
+    }
+
     init(view: UIView) {
         self.view = view
-        kStreamSize = view.frame.size
         self.audioSettings = [
             AVFormatIDKey : kAudioFormatAppleIMA4,
             AVNumberOfChannelsKey : 1,
@@ -89,7 +80,7 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.videoWriterInput = AVAssetWriterInput(mediaType: .video,
                                                    outputSettings: self.videoSettings)
         super.init()
-        self.updateFileStorage(with: self.camereType)
+        self.updateFileStorage()
         self.initialize()
         self.configureWriters()
         self.configurePreview()
@@ -98,51 +89,40 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     
     open func startRecording() {
         self.isRecording = true
-        switch self.camereType {
-        case .photo:
-            let settings = AVCapturePhotoSettings()
-            self.photoOutput.capturePhoto(with: settings, delegate: self)
-        case .video:
-            self.configureWriters()
-            self.updateFileStorage(with: self.camereType)
-            guard let assetWriter = self.assetWriter else {
-                assertionFailure("AssetWriter was not initialized")
-                return
-            }
-            if !assetWriter.startWriting() {
-                assertionFailure("AssetWriter error: \(assetWriter.error.debugDescription)")
-            }
-            self.isRecording = true
-            self.videoOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
-            self.audioOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
+        self.configureWriters()
+        self.updateFileStorage()
+        guard let assetWriter = self.assetWriter else {
+            assertionFailure("AssetWriter was not initialized")
+            return
         }
+        if !assetWriter.startWriting() {
+            assertionFailure("AssetWriter error: \(assetWriter.error.debugDescription)")
+        }
+        self.isRecording = true
+        self.videoOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
+        self.audioOutput.setSampleBufferDelegate(self, queue: self.recordingQueue)
     }
-    
+
     open func stopRecording() {
         self.isRecording = false
         self.videoOutput.setSampleBufferDelegate(nil, queue: nil)
         self.audioOutput.setSampleBufferDelegate(nil, queue: nil)
         self.assetWriter?.finishWriting {
-            if let fileURL = self.recordingURL {
-                self.videoCompletion?(fileURL)
-            }
+            self.videoCompletion?(self.fileURL)
+            self.recoderNummber += 1
             self.isRecording = false
             self.isRecordingSessionStarted = false
         }
     }
     
-    private func updateFileStorage(with mode: CameraType) {
-        var fileURL: URL
-        switch mode {
-        case .video:
-            fileURL = URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/video.mov")
-        case .photo:
-            fileURL = URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/image.mp4")
-        }
-        self.recordingURL = fileURL
-        let fileManager = FileManager()
+    private func updateFileStorage() {
         if fileManager.isDeletableFile(atPath: fileURL.path) {
-            _ = try? fileManager.removeItem(atPath: fileURL.path)
+            do {
+                // delete old video
+                try FileManager.default.removeItem(at: fileURL)
+            } catch {
+                print(error.localizedDescription)
+            }
         }
     }
     
@@ -174,9 +154,7 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     
     private func configureWriters() {
         do {
-            if let fileURL = self.recordingURL {
-                self.assetWriter = try AVAssetWriter(outputURL: fileURL, fileType: .mov)
-            }
+            self.assetWriter = try AVAssetWriter(outputURL: fileURL, fileType: .mov)
         } catch {
             print(error.localizedDescription)
         }

@@ -18,21 +18,11 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     @IBOutlet private weak var innerView: UIView?
     @IBOutlet weak var videoView: UIView!
     @IBOutlet weak var cameraView: UIView!
-    @IBOutlet weak var image: UIImageView!
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
     private var cameraManager: TCCoreCamera?
     private var fileUrls = [URL]()
-    private var writer: AVAssetWriter?
     private var player: AVPlayer?
-
-    func tempURL() -> URL? {
-        let directory = NSTemporaryDirectory() as NSString
-        if #available(iOS 13.0, *), directory != "" {
-            let path = directory.appendingPathComponent("\(NSDate.now).mp4")
-            return URL(fileURLWithPath: path)
-        }
-        return nil
-    }
+    private var audioSession = AVAudioSession.sharedInstance()
 
     @IBAction private func recordingButton(_ sender: UIButton) {
         guard let cameraManager = self.cameraManager else { return }
@@ -54,24 +44,21 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         }
         //2. Create AVPlayer object
         let asset = AVAsset(url: URL(fileURLWithPath: path))
-        let size = asset.videoSize()
+        let videoSize = asset.videoSize()
         let playerItem = AVPlayerItem(asset: asset)
-        let ratio =  size.height/size.width
+        let ratio = videoSize.height / videoSize.width
         self.player = AVPlayer(playerItem: playerItem)
-        //3. Create AVPlayerLayer object
         let playerLayer = AVPlayerLayer(player: player)
-        
         let withScreen = UIScreen.main.bounds.width
         heightContraintVideo.constant = withScreen * ratio
-
         playerLayer.frame = CGRect(x: 0, y: 0,
                                    width: withScreen,
                                    height: withScreen * ratio)
-        //4. Add playerLayer to view's layer
         self.videoView.layer.addSublayer(playerLayer)
-        
-        let audioSession = AVAudioSession.sharedInstance()
+        settingAudioSession()
+    }
 
+    private func settingAudioSession() {
         //Executed right before playing avqueueplayer media
         do {
             try audioSession.setCategory(.playAndRecord, options: .defaultToSpeaker)
@@ -80,7 +67,11 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             fatalError("Error Setting Up Audio Session")
         }
     }
-    
+
+    @IBAction func exportVideo(_ sender: UIButton) {
+        mergeVideoCamera()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController?.isNavigationBarHidden = true
@@ -95,43 +86,15 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         self.setupStartButton()
         initVideo()
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.cameraManager = TCCoreCamera(view: self.cameraView)
-        self.cameraManager?.videoCompletion = { (fileURL) in
+        self.cameraManager?.videoCompletion = { fileURL in
             print("finished writing to \(fileURL.absoluteString)")
-            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
-                debugPrint("video.m4v not found")
-                return
-            }
-            let url = URL(fileURLWithPath: path)
-            
-            DispatchQueue.main.async {
-                DPVideoMerger().gridMergeVideos(
-                    withFileURLs: [url,fileURL],
-                    videoResolution: CGSize(
-                        width: self.view.frame.width,
-                        height: self.view.frame.height - UIApplication.shared.statusBarFrame.height
-                    ),
-                    completion: {
-                        (_ mergedVideoFile: URL?, _ error: Error?) -> Void in
-                        if error != nil {
-                            let errorMessage = "Could not merge videos: \(error?.localizedDescription ?? "error")"
-                            let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
-                            alert.addAction( UIAlertAction( title: "OK", style: .default, handler: { (a) in } ) )
-                            
-                            self.present(alert, animated: true) {() -> Void in }
-                            return
-                        }
-                        
-                        self.saveInPhotoLibrary(with: mergedVideoFile!)
-                    }
-                )
-            }
+            self.fileUrls.append(fileURL)
         }
-        
-        self.cameraManager?.camereType = .video
+
     }
 
     private func setupStartButton() {
@@ -174,6 +137,48 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             }
         }
     }
+
+    private func mergeVideoCamera() {
+        let assets = self.fileUrls.compactMap { url in
+            if (try? url.checkResourceIsReachable()) == true {
+                return AVAsset(url: url)
+            }
+            return nil
+        }
+
+        let width = self.view.frame.width
+        let height = self.view.frame.height - UIApplication.shared.statusBarFrame.height
+
+        KVVideoManager.shared.mergeWithAnimation(arrayVideos: assets) { fileURL, error in
+            guard let fileURL = fileURL else {
+                print("Merge video error: \(error)")
+                return
+            }
+            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+                debugPrint("video.m4v not found")
+                return
+            }
+            let url = URL(fileURLWithPath: path)
+            DPVideoMerger().gridMergeVideos(
+                withFileURLs: [url, fileURL],
+                videoResolution: CGSize(width: width, height: height),
+                completion: {
+                    (_ mergedVideoFile: URL?, _ error: Error?) -> Void in
+                    if error != nil {
+                        let errorMessage = "Could not merge videos: \(error?.localizedDescription ?? "error")"
+                        let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
+                        alert.addAction( UIAlertAction( title: "OK", style: .default, handler: { (a) in } ) )
+
+                        self.present(alert, animated: true) {() -> Void in }
+                        return
+                    }
+
+                    self.saveInPhotoLibrary(with: mergedVideoFile!)
+                }
+            )
+        }
+    }
+
 }
 
 extension AVAsset {
@@ -191,13 +196,5 @@ extension AVAsset {
             return realVidSize
         }
         return CGSize(width: 0, height: 0)
-    }
-
-}
-extension URL {
-    static var documents: URL {
-        return FileManager
-            .default
-            .urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
 }

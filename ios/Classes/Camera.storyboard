@@ -21,20 +21,14 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rAl-hh-thJ">
-                                <rect key="frame" x="0.0" y="44" width="375" height="432"/>
+                                <rect key="frame" x="0.0" y="44" width="375" height="0.0"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="432" id="HLg-lt-5p6"/>
+                                    <constraint firstAttribute="height" id="HLg-lt-5p6"/>
                                 </constraints>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="z10-b7-IoT">
-                                <rect key="frame" x="0.0" y="476" width="375" height="191"/>
-                                <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Tyd-NL-k6e">
-                                        <rect key="frame" x="67" y="53" width="240" height="128"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    </imageView>
-                                </subviews>
+                                <rect key="frame" x="0.0" y="44" width="375" height="623"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="PyD-nP-HEi">
@@ -73,6 +67,21 @@
                                     <action selector="recordingButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="4TU-Ti-yRF"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5s0-hf-mFC">
+                                <rect key="frame" x="34" y="557" width="80" height="80"/>
+                                <color key="backgroundColor" systemColor="systemOrangeColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="80" id="Kdc-qJ-yYJ"/>
+                                    <constraint firstAttribute="width" constant="80" id="Rwo-xw-RQj"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="20"/>
+                                <state key="normal" title="Export">
+                                    <color key="titleColor" red="0.97647064920000004" green="0.97647064920000004" blue="0.97647064920000004" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                </state>
+                                <connections>
+                                    <action selector="exportVideo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JnR-wk-ksx"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -84,6 +93,8 @@
                             <constraint firstItem="rAl-hh-thJ" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="G1k-al-b88"/>
                             <constraint firstItem="rAl-hh-thJ" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="GJm-MM-Dgu"/>
                             <constraint firstAttribute="trailing" secondItem="z10-b7-IoT" secondAttribute="trailing" id="JXf-9B-2Lk"/>
+                            <constraint firstItem="5s0-hf-mFC" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="18" id="Nie-sg-t8I"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="5s0-hf-mFC" secondAttribute="bottom" constant="30" id="PVv-gG-Kvt"/>
                             <constraint firstItem="Lp3-Ny-3pM" firstAttribute="leading" secondItem="PyD-nP-HEi" secondAttribute="leading" id="dnV-db-4u6"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="z10-b7-IoT" secondAttribute="bottom" id="lqZ-Uu-oho"/>
                             <constraint firstItem="Lp3-Ny-3pM" firstAttribute="trailing" secondItem="PyD-nP-HEi" secondAttribute="trailing" id="pkB-Rf-VG2"/>
@@ -96,7 +107,6 @@
                     <connections>
                         <outlet property="cameraView" destination="z10-b7-IoT" id="gDq-tk-JtR"/>
                         <outlet property="heightContraintVideo" destination="HLg-lt-5p6" id="m83-lf-BWG"/>
-                        <outlet property="image" destination="Tyd-NL-k6e" id="5dl-57-YLG"/>
                         <outlet property="innerView" destination="eFF-OU-xoO" id="rEZ-Aw-Kbq"/>
                         <outlet property="middleView" destination="ghT-5A-2Sp" id="RGM-UM-rqQ"/>
                         <outlet property="topView" destination="PyD-nP-HEi" id="MJU-2P-99D"/>
@@ -111,6 +121,9 @@
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemOrangeColor">
+            <color red="1" green="0.58431372549019611" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
