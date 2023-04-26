@@ -147,7 +147,7 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     }
     
     private func initialize() {
-        self.session.sessionPreset = .high
+        self.session.sessionPreset = .photo
         self.videoWriterInput.expectsMediaDataInRealTime = true
         self.audioWriterInput.expectsMediaDataInRealTime = true
         self.cameraPosition = .front
