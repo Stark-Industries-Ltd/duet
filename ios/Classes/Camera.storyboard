@@ -95,6 +95,7 @@
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" prompted="NO"/>
                     <connections>
                         <outlet property="cameraView" destination="z10-b7-IoT" id="gDq-tk-JtR"/>
+                        <outlet property="heightContraintVideo" destination="HLg-lt-5p6" id="m83-lf-BWG"/>
                         <outlet property="image" destination="Tyd-NL-k6e" id="5dl-57-YLG"/>
                         <outlet property="innerView" destination="eFF-OU-xoO" id="rEZ-Aw-Kbq"/>
                         <outlet property="middleView" destination="ghT-5A-2Sp" id="RGM-UM-rqQ"/>

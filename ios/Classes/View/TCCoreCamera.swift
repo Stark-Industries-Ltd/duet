@@ -204,7 +204,7 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         )
         rootLayer.insertSublayer(previewLayer, at: 0)
         self.previewLayer = previewLayer
-        DispatchQueue(label: "startRunning").async {
+        DispatchQueue.global(qos: .background).async {
             self.session.startRunning()
         }
     }
@@ -238,200 +238,17 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
             }
         }
     }
-    
-    
-    
+
     func captureOutput(_ captureOutput: AVCaptureOutput, didOutput
                        sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-//        print("Capture")
         if !self.isRecordingSessionStarted {
             let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             self.assetWriter?.startSession(atSourceTime: presentationTime)
             self.isRecordingSessionStarted = true
         }
-        
-//        if captureOutput is AVCaptureVideoDataOutput {
-//            print(connection)
-//            if #available(iOS 13.0, *) {
-//                let newBuffer = croppedSampleBuffer(sampleBuffer: sampleBuffer, rect: CGRect(x: 0, y: 0, width: kStreamSize.width, height: kStreamSize.height))
-//                                print(sampleBuffer.imageBuffer!)
-//
-//
-//                self.appendSampleBuffer(newBuffer)
-//            } else {
-//                // Fallback on earlier versions
-//
-//
-//                self.appendSampleBuffer(sampleBuffer)
-//            }
-//        }else{
-            
-            
-            self.appendSampleBuffer(sampleBuffer)
-//        }
+        self.appendSampleBuffer(sampleBuffer)
     }
-    
-//    func croppedSampleBuffer(sampleBuffer:CMSampleBuffer, rect:CGRect)->CMSampleBuffer? {
-//            
-//            guard let imageBufferIn = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-//                return nil
-//            }
-//            
-//            CVPixelBufferLockBaseAddress(imageBufferIn, .readOnly)
-//            let bytesPerRow = CVPixelBufferGetBytesPerRow(imageBufferIn);
-//            let originWidth = CVPixelBufferGetWidth(imageBufferIn);
-//            let bytesPerPixel = bytesPerRow / originWidth;
-//            var cropX = Int(rect.origin.x)
-//            let cropY = Int(rect.origin.y);
-//            // Start pixel in RGB color space can't be odd.
-//            if (cropX % 2 != 0) {
-//                cropX+=1;
-//            }
-//            
-//            guard let baseAddress = CVPixelBufferGetBaseAddress(imageBufferIn)?.assumingMemoryBound(to: UInt8.self) else{
-//                return nil
-//            }
-//            
-//            let cropStartOffset = cropY * bytesPerRow + cropX * bytesPerPixel;
-//            let pixelBuffer = UnsafeMutablePointer<CVPixelBuffer?>.allocate(capacity: MemoryLayout<CVPixelBuffer?>.size)
-//            let pixelFormat = CVPixelBufferGetPixelFormatType(imageBufferIn)
-//            var error:CVReturn
-//            let options = [
-//                kCVPixelBufferCGImageCompatibilityKey as String : true,
-//                kCVPixelBufferCGBitmapContextCompatibilityKey as String : true,
-//                kCVPixelBufferWidthKey as String : rect.size.width,
-//                kCVPixelBufferHeightKey as String : rect.size.height,
-//                ] as CFDictionary
-//            
-//            error = CVPixelBufferCreateWithBytes(kCFAllocatorDefault,                 // allocator
-//                Int(rect.size.width),                     // width
-//                Int(rect.size.height),                    // height
-//                pixelFormat,                         // pixelFormatType
-//                baseAddress + cropStartOffset,                           // baseAddress
-//                bytesPerRow,                         // bytesPerRow
-//                nil,                                // releaseCallback
-//                nil,                                // releaseRefCon
-//                options,   // pixelBufferAttributes
-//                pixelBuffer)
-//            
-//            if (error != kCVReturnSuccess) {
-//                print("Crop CVPixelBufferCreateWithBytes error \(error)");
-//                return nil;
-//            }
-//            
-//            var ciImage:CIImage = CIImage(cvImageBuffer: imageBufferIn)
-//            ciImage = ciImage.cropped(to: rect)
-//            // CIImage is not in the original point after cropping. So we need to pan.
-//            ciImage = ciImage.transformed(by: CGAffineTransform(translationX: CGFloat(-cropX), y: CGFloat(-cropY)))
-//            
-//            guard let gCIContext = self.gCIContext,  let croppedPixelBuffer = pixelBuffer.pointee else {
-//                return nil
-//            }
-//            
-//            gCIContext.render(ciImage, to: croppedPixelBuffer)
-//            // Prepares sample timing info.
-//            let sampleTime = UnsafeMutablePointer<CMSampleTimingInfo>.allocate(capacity: MemoryLayout<CMSampleTimingInfo>.size)
-//            sampleTime.initialize(to: CMSampleTimingInfo(
-//                duration: CMSampleBufferGetDuration(sampleBuffer),
-//                presentationTimeStamp: CMSampleBufferGetPresentationTimeStamp(sampleBuffer),
-//                decodeTimeStamp: CMSampleBufferGetDecodeTimeStamp(sampleBuffer)))
-//            let videoInfo: UnsafeMutablePointer<CMVideoFormatDescription?> = UnsafeMutablePointer.allocate(capacity: MemoryLayout<CMVideoFormatDescription?>.size)
-//            error =
-//                CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: croppedPixelBuffer, formatDescriptionOut: videoInfo);
-//            if (error != kCVReturnSuccess) {
-//                print("CMVideoFormatDescriptionCreateForImageBuffer error \(error as Int32)")
-//                return nil;
-//            }
-//            guard let videoInfoDesc = videoInfo.pointee else {
-//                return nil
-//            }
-//            // Creates `CMSampleBufferRef`.
-//            let resultBuffer: UnsafeMutablePointer<CMSampleBuffer?> = UnsafeMutablePointer.allocate(capacity: MemoryLayout<CMSampleBuffer?>.size)
-//            error = CMSampleBufferCreateForImageBuffer(
-//                allocator: kCFAllocatorDefault,
-//                imageBuffer: croppedPixelBuffer,
-//                dataReady: true,
-//                makeDataReadyCallback: nil,
-//                refcon: nil,
-//                formatDescription: videoInfoDesc,
-//                sampleTiming: sampleTime,
-//                sampleBufferOut: resultBuffer);
-//            if (error != kCVReturnSuccess) {
-//                print("CMSampleBufferCreateForImageBuffer error \(error as Int32)");
-//            }
-//            CVPixelBufferUnlockBaseAddress(imageBufferIn, .readOnly);
-//            return resultBuffer.pointee;
-//        }
-//    
-    
-//    private func pushStream(_ output: CIImage) {
-//        let kStreamSize = view.frame.size
-//       var newPixelBuffer: CVPixelBuffer? = nil
-//       CVPixelBufferCreate(kCFAllocatorDefault,
-//                           Int(kStreamSize.width),
-//                           Int(kStreamSize.height),
-//                           kCVPixelFormatType_32BGRA,
-//                           nil,
-//                           &newPixelBuffer)
-//
-//       kCIContext.render(output, to: newPixelBuffer!)
-//       lfLiveSession.pushVideo(newPixelBuffer)
-//     }
-//
-    
-    private func convert(_ sampleBuffer: CMSampleBuffer) -> CIImage? {
-        let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-        CVPixelBufferLockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
-        
-        let baseAddress = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0)!
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(pixelBuffer)
-        let width = CVPixelBufferGetWidth(pixelBuffer)
-        let height = CVPixelBufferGetHeight(pixelBuffer)
-        
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        
-        let newContext = CGContext(data: baseAddress,
-                                   width: width,
-                                   height: height,
-                                   bitsPerComponent: 8,
-                                   bytesPerRow: bytesPerRow,
-                                   space: colorSpace,
-                                   bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)
-        
-        if(newContext == nil){
-            return nil
-        }
-       let imageRef = newContext!.makeImage()!
-       CVPixelBufferUnlockBaseAddress(pixelBuffer, CVPixelBufferLockFlags(rawValue: 0))
 
-       var output = CIImage(cgImage: imageRef)
-
-        var transform = output.orientationTransform(forExifOrientation: 6) // UIImageOrientation.right
-        output = output.transformed(by: transform)
-
-       let ratio = kStreamSize.width / output.extent.size.width
-        transform = output.orientationTransform(forExifOrientation: 1)
-       transform = transform.scaledBy(x: ratio, y: ratio)
-        output = output.transformed(by: transform)
-
-        transform = output.orientationTransform(forExifOrientation: 1)
-       transform = transform.translatedBy(x: 0, y: -(output.extent.size.height - kStreamSize.height) / 2)
-        output = output.transformed(by: transform)
-
-        return output.cropped(to: CGRect(origin: CGPoint.zero, size: kStreamSize))
-     }
-
-    
-//    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?, previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?, resolvedSettings: AVCaptureResolvedPhotoSettings, bracketSettings: AVCaptureBracketedStillImageSettings?, error: Error?) {
-//        if let buffer = photoSampleBuffer, let data = AVCapturePhotoOutput.jpegPhotoDataRepresentation(forJPEGSampleBuffer: buffer, previewPhotoSampleBuffer: nil),
-//            let image = UIImage(data: data) {
-//            self.photoCompletion?(image)
-//        }
-//    }
-//    func photoOutput(_ output: AVCapturePhotoOutput, didCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
-//
-//    }
-    
     private func appendSampleBuffer(_ sampleBuffer: CMSampleBuffer) {
         let description = CMFormatDescriptionGetMediaType(CMSampleBufferGetFormatDescription(sampleBuffer)!)
         switch description {
