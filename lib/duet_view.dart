@@ -1,26 +1,45 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class DuetView extends StatefulWidget {
-  const DuetView({Key? key}) : super(key: key);
+class DuetView extends StatelessWidget {
+  final DuetViewArgs args;
 
-  @override
-  State<DuetView> createState() => _DuetViewState();
-}
+  const DuetView({
+    Key? key,
+    this.args = const DuetViewArgs(),
+  }) : super(key: key);
 
-class _DuetViewState extends State<DuetView> {
   @override
   Widget build(BuildContext context) {
     // This is used in the platform side to register the view.
     const String viewType = '<platform-view-type>';
     // Pass parameters to the platform side.
     final Map<String, dynamic> creationParams = <String, dynamic>{};
+    creationParams.addAll(args.toJson());
 
-    return UiKitView(
-      viewType: viewType,
-      layoutDirection: TextDirection.ltr,
-      creationParams: creationParams,
-      creationParamsCodec: const StandardMessageCodec(),
-    );
+    if (Platform.isIOS) {
+      return UiKitView(
+        viewType: viewType,
+        layoutDirection: TextDirection.ltr,
+        creationParams: creationParams,
+        creationParamsCodec: const StandardMessageCodec(),
+      );
+    }
+
+    return const Center(child: Text('Platform not supported'));
+  }
+}
+
+class DuetViewArgs {
+  final String? url;
+
+  const DuetViewArgs({this.url});
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'url': url,
+    };
   }
 }

@@ -14,7 +14,7 @@ abstract class DuetPlatform extends PlatformInterface {
   ///
   /// Defaults to [MethodChannelDuet].
   static DuetPlatform get instance => _instance;
-  
+
   /// Platform-specific implementations should set this with their own
   /// platform-specific class that extends [DuetPlatform] when
   /// they register themselves.
@@ -23,7 +23,13 @@ abstract class DuetPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
-  }
+  Future<void> onNativeCall({
+    OnVideoRecorded? onVideoRecorded,
+    OnAudioReceived? onAudioReceived,
+    OnVideoMerged? onVideoMerged,
+  });
+
+  Future<String?> recordDuet();
+
+  Future<String?> resetDuet();
 }

@@ -26,26 +26,39 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     private var player: AVPlayer?
     private var audioSession = AVAudioSession.sharedInstance()
 
+    var viewArgs: DuetViewArgs?
+
     @IBAction private func recordingButton(_ sender: UIButton) {
-        guard let cameraManager = self.cameraManager else { return }
-        if cameraManager.isRecording {
-            cameraManager.stopRecording()
-            self.setupStartButton()
-            player?.pause()
-        } else {
-            cameraManager.startRecording()
-            self.setupStopButton()
-            self.player?.play()
-        }
+        record()
+    }
+
+    func record(){
+            guard let cameraManager = self.cameraManager else { return }
+            if cameraManager.isRecording {
+                cameraManager.stopRecording()
+                self.setupStartButton()
+                player?.pause()
+            } else {
+                cameraManager.startRecording()
+                self.setupStopButton()
+                self.player?.play()
+            }
     }
 
     private func initVideo() {
-        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
-            debugPrint("video.m4v not found")
-            return
+
+        //2. Create AVPlayer object
+        var asset: AVAsset
+        if let url = viewArgs?.url {
+            asset = AVAsset(url: url)
+        }else{
+            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+                debugPrint("video.m4v not found")
+                return
+            }
+            asset = AVAsset(url: URL(fileURLWithPath: path))
         }
         //2. Create AVPlayer object
-        let asset = AVAsset(url: URL(fileURLWithPath: path))
         let videoSize = asset.videoSize
         let playerItem = AVPlayerItem(asset: asset)
         let ratio = videoSize.height / videoSize.width
@@ -103,6 +116,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         self.cameraManager = TCCoreCamera(view: self.cameraView)
         self.cameraManager?.videoCompletion = { recoderModel in
             print("finished writing to \(recoderModel.fileURL.absoluteString)")
+            SwiftDuetPlugin.notifyFlutter(event: EventType.VIDEO_RECORDED, arguments: fileURL.absoluteString)
             self.listRecoder.append(recoderModel)
         }
     }
