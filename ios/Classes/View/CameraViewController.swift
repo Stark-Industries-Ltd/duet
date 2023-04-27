@@ -20,7 +20,9 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     @IBOutlet weak var cameraView: UIView!
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
     private var cameraManager: TCCoreCamera?
-    private var fileUrls = [URL]()
+
+    private var listRecoder = [RecoderModel]()
+
     private var player: AVPlayer?
     private var audioSession = AVAudioSession.sharedInstance()
 
@@ -44,7 +46,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         }
         //2. Create AVPlayer object
         let asset = AVAsset(url: URL(fileURLWithPath: path))
-        let videoSize = asset.videoSize()
+        let videoSize = asset.videoSize
         let playerItem = AVPlayerItem(asset: asset)
         let ratio = videoSize.height / videoSize.width
         self.player = AVPlayer(playerItem: playerItem)
@@ -69,7 +71,16 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     }
 
     @IBAction func exportVideo(_ sender: UIButton) {
-        mergeVideoCamera()
+//        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+//            print("video.m4v not found")
+//            return
+//        }
+//        let url = URL(fileURLWithPath: path)
+//
+//        url.extractAudioFromVideo(audioURL: URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/audioSave.mp3")) { url, error in
+//            url?.presentShareActivity(viewController: self)
+//        }
+        mergeVideosRecoder()
     }
 
     override func viewDidLoad() {
@@ -90,11 +101,10 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.cameraManager = TCCoreCamera(view: self.cameraView)
-        self.cameraManager?.videoCompletion = { fileURL in
-            print("finished writing to \(fileURL.absoluteString)")
-            self.fileUrls.append(fileURL)
+        self.cameraManager?.videoCompletion = { recoderModel in
+            print("finished writing to \(recoderModel.fileURL.absoluteString)")
+            self.listRecoder.append(recoderModel)
         }
-
     }
 
     private func setupStartButton() {
@@ -138,10 +148,10 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         }
     }
 
-    private func mergeVideoCamera() {
-        let assets = self.fileUrls.compactMap { url in
-            if (try? url.checkResourceIsReachable()) == true {
-                return AVAsset(url: url)
+    private func mergeVideosRecoder() {
+        let assets = self.listRecoder.compactMap { recoder in
+            if (try? recoder.fileURL.checkResourceIsReachable()) == true {
+                return AVAsset(url: recoder.fileURL)
             }
             return nil
         }
@@ -149,52 +159,38 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         let width = self.view.frame.width
         let height = self.view.frame.height - UIApplication.shared.statusBarFrame.height
 
-        KVVideoManager.shared.mergeWithAnimation(arrayVideos: assets) { fileURL, error in
-            guard let fileURL = fileURL else {
+        KVVideoManager.shared.mergeWithAnimation(arrayVideos: assets) { [weak self] fileURL, error in
+            guard let self = self, let fileURL = fileURL else {
                 print("Merge video error: \(error)")
                 return
             }
-            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
-                debugPrint("video.m4v not found")
-                return
-            }
-            let url = URL(fileURLWithPath: path)
-            DPVideoMerger().gridMergeVideos(
-                withFileURLs: [url, fileURL],
-                videoResolution: CGSize(width: width, height: height),
-                completion: {
-                    (_ mergedVideoFile: URL?, _ error: Error?) -> Void in
-                    if error != nil {
-                        let errorMessage = "Could not merge videos: \(error?.localizedDescription ?? "error")"
-                        let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
-                        alert.addAction( UIAlertAction( title: "OK", style: .default, handler: { (a) in } ) )
+            self.gridMergeVideos(fileURL: fileURL, cGSize: CGSize(width: width, height: height))
+        }
+    }
 
-                        self.present(alert, animated: true) {() -> Void in }
-                        return
-                    }
+    private func gridMergeVideos(fileURL: URL, cGSize: CGSize) {
+        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+            print("video.m4v not found")
+            return
+        }
+        let url = URL(fileURLWithPath: path)
+        DPVideoMerger().gridMergeVideos(
+            withFileURLs: [url, fileURL],
+            videoResolution: cGSize,
+            completion: {
+                (_ mergedVideoFile: URL?, _ error: Error?) -> Void in
+                if error != nil {
+                    let errorMessage = "Could not merge videos: \(error?.localizedDescription ?? "error")"
+                    let alert = UIAlertController(title: "Error", message: errorMessage, preferredStyle: .alert)
+                    alert.addAction( UIAlertAction( title: "OK", style: .default, handler: { (a) in } ) )
 
-                    self.saveInPhotoLibrary(with: mergedVideoFile!)
+                    self.present(alert, animated: true) {() -> Void in }
+                    return
                 }
-            )
-        }
+
+                self.saveInPhotoLibrary(with: mergedVideoFile!)
+            }
+        )
     }
 
-}
-
-extension AVAsset {
-    func videoSize() -> CGSize {
-        let tracks = self.tracks(withMediaType: AVMediaType.video)
-        if (tracks.count > 0){
-            let videoTrack = tracks[0]
-            let size = videoTrack.naturalSize
-            let txf = videoTrack.preferredTransform
-            let realVidSize = size.applying(txf)
-            print(videoTrack)
-            print(txf)
-            print(size)
-            print(realVidSize)
-            return realVidSize
-        }
-        return CGSize(width: 0, height: 0)
-    }
 }

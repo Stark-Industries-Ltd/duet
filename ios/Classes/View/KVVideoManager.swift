@@ -31,7 +31,7 @@ struct TextData {
 class KVVideoManager {
     static let shared = KVVideoManager()
 
-//    let defaultSize = CGSize(width: 720, height: 1280) // Default video size
+    let defaultSize = CGSize(width: 720, height: 1280) // Default video size
     var videoDuration = 30.0 // Duration of output video when merging videos & images
     var imageDuration = 5.0 // Duration of each image
 
@@ -98,7 +98,7 @@ class KVVideoManager {
 
             // Add instruction for video track
             if let videoCompositionTrack = videoCompositionTrack {
-                let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: video, targetSize: video.videoSize())
+                let layerInstruction = videoCompositionInstructionForTrack(track: videoCompositionTrack, asset: video, targetSize: video.videoSize)
                 arrayLayerInstructions.append(layerInstruction)
             }
 
@@ -124,7 +124,7 @@ class KVVideoManager {
         let mainComposition = AVMutableVideoComposition()
         mainComposition.instructions = [mainInstruction]
         mainComposition.frameDuration = CMTimeMake(value: 1, timescale: 30)
-        mainComposition.renderSize = video.videoSize()
+        mainComposition.renderSize = video.videoSize
 
         // Init exporter
         let exporter = AVAssetExportSession(asset: mixComposition, presetName: AVAssetExportPresetHighestQuality)
@@ -144,7 +144,7 @@ class KVVideoManager {
     private func doMerge(arrayVideos:[AVAsset], animation:Bool, completion:@escaping Completion) -> Void {
         var insertTime = CMTime.zero
         var arrayLayerInstructions:[AVMutableVideoCompositionLayerInstruction] = []
-        var renderSize = arrayVideos.first?.videoSize() ?? CGSize(width: 720, height: 1280)
+        var renderSize = arrayVideos.first?.videoSize ?? defaultSize
 
         // Silence sound (in case video has no sound track)
 //        guard let silenceURL = Bundle.main.url(forResource: "silence", withExtension: "mp3") else {

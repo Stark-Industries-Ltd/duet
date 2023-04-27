@@ -9,9 +9,24 @@
 import UIKit
 import AVFoundation
 
+class RecoderModel {
+    let fileURL: URL
+    var audioURL: URL?
+
+    init(fileURL: URL, audioURL: URL) {
+        self.fileURL = fileURL
+        self.fileURL.extractAudioFromVideo(audioURL: audioURL) { audioURL, error in
+            if let audioURL = audioURL {
+                print("audioURL \(audioURL.absoluteString)")
+                self.audioURL = audioURL
+            }
+        }
+    }
+}
+
 class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
                     AVCaptureVideoDataOutputSampleBufferDelegate, AVCapturePhotoCaptureDelegate {
-    typealias VideoCompletion = (URL) -> Void
+    typealias VideoCompletion = (RecoderModel) -> Void
     typealias PhotoCompletion = (UIImage) -> Void
 
     public enum CameraPosition {
@@ -58,22 +73,19 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     open var maxZoomFactor: CGFloat = 10.0
     private var recoderNummber = 0
     private let fileManager = FileManager()
-    private var fileURL: URL {
-        return URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/video\(self.recoderNummber).mp4")
-    }
 
     init(view: UIView) {
         self.view = view
         self.audioSettings = [
-            AVFormatIDKey : kAudioFormatAppleIMA4,
-            AVNumberOfChannelsKey : 1,
-            AVSampleRateKey : 32000.0
+            AVFormatIDKey: kAudioFormatAppleIMA4,
+            AVNumberOfChannelsKey: 1,
+            AVSampleRateKey: 32000.0
         ]
         self.videoSettings = [
-            AVVideoCodecKey : AVVideoCodecH264,
-            AVVideoWidthKey : view.frame.width,
-            AVVideoHeightKey : view.frame.height,
-            AVVideoScalingModeKey : AVVideoScalingModeResizeAspectFill
+            AVVideoCodecKey: AVVideoCodecH264,
+            AVVideoWidthKey: view.frame.width,
+            AVVideoHeightKey: view.frame.height,
+            AVVideoScalingModeKey: AVVideoScalingModeResizeAspectFill
         ]
         self.audioWriterInput = AVAssetWriterInput(mediaType: .audio,
                                                    outputSettings: self.audioSettings)
@@ -108,7 +120,9 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
         self.videoOutput.setSampleBufferDelegate(nil, queue: nil)
         self.audioOutput.setSampleBufferDelegate(nil, queue: nil)
         self.assetWriter?.finishWriting {
-            self.videoCompletion?(self.fileURL)
+            let recoderModel = RecoderModel(fileURL: self.fileURL,
+                                            audioURL: self.audioURL)
+            self.videoCompletion?(recoderModel)
             self.recoderNummber += 1
             self.isRecording = false
             self.isRecordingSessionStarted = false
@@ -172,7 +186,7 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
     
     private func configurePreview() {
         let previewLayer: AVCaptureVideoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.session)
-        //        importent line of code what will did a trick
+        // importent line of code what will did a trick
         previewLayer.videoGravity = .resizeAspectFill
         let rootLayer = self.view.layer
         rootLayer.masksToBounds = true
@@ -243,5 +257,13 @@ class TCCoreCamera: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate,
                 }
             }
         }
+    }
+
+    private var fileURL: URL {
+        return URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/video\(self.recoderNummber).mp4")
+    }
+
+    private var audioURL: URL {
+        return URL(fileURLWithPath: "\(NSTemporaryDirectory() as String)/audio\(self.recoderNummber).m4v")
     }
 }
