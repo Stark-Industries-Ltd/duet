@@ -13,7 +13,7 @@ extension URL {
 
     func extractAudioFromVideo(audioURL: URL, completion: @escaping (URL?, Error?) -> Void) {
         let asset = AVURLAsset(url: self)
-        guard let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetPassthrough) else {
+        guard let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else {
             completion(nil, NSError(domain: "com.example.extractaudio", code: -1, userInfo: nil))
             return
         }

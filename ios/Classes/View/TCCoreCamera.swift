@@ -18,6 +18,7 @@ class RecoderModel {
         self.fileURL.extractAudioFromVideo(audioURL: audioURL) { audioURL, error in
             if let audioURL = audioURL {
                 print("audioURL \(audioURL.absoluteString)")
+                SwiftDuetPlugin.notifyFlutter(event: EventType.AUDIO_RESULT, arguments: audioURL.absoluteString)
                 self.audioURL = audioURL
             }
         }

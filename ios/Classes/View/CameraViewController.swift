@@ -116,7 +116,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         self.cameraManager = TCCoreCamera(view: self.cameraView)
         self.cameraManager?.videoCompletion = { recoderModel in
             print("finished writing to \(recoderModel.fileURL.absoluteString)")
-            SwiftDuetPlugin.notifyFlutter(event: EventType.VIDEO_RECORDED, arguments: fileURL.absoluteString)
+            self.saveInPhotoLibrary(with: recoderModel.fileURL)
             self.listRecoder.append(recoderModel)
         }
     }
@@ -172,13 +172,25 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
 
         let width = self.view.frame.width
         let height = self.view.frame.height - UIApplication.shared.statusBarFrame.height
-
-        KVVideoManager.shared.mergeWithAnimation(arrayVideos: assets) { [weak self] fileURL, error in
+        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+            debugPrint("video.m4v not found")
+            return
+        }
+        if #available(iOS 13.0, *) {
+            print(NSDate.now)
+        } else {
+            // Fallback on earlier versions
+        }
+        KVVideoManager.shared.mergeWithAnimation(arrayVideos: [AVAsset(url: URL(fileURLWithPath: path)),
+                                                               AVAsset(url: listRecoder.first!.fileURL)]) { [weak self] fileURL, error in
             guard let self = self, let fileURL = fileURL else {
                 print("Merge video error: \(error)")
                 return
             }
-            self.gridMergeVideos(fileURL: fileURL, cGSize: CGSize(width: width, height: height))
+            
+            SwiftDuetPlugin.notifyFlutter(event: EventType.VIDEO_RECORDED, arguments: fileURL.absoluteString)
+//            self.saveInPhotoLibrary(with: fileURL)
+//            self.gridMergeVideos(fileURL: fileURL, cGSize: CGSize(width: width, height: height))
         }
     }
 
