@@ -71,10 +71,7 @@ public class CameraEngine: NSObject {
                 let videoout = AVCaptureVideoDataOutput()
                 videoout.setSampleBufferDelegate(self, queue: _captureQueue)
                 let settings: [String : Any] = [
-                    AVVideoCodecKey: AVVideoCodecH264,
-                    AVVideoWidthKey: parentView.frame.width,
-                    AVVideoHeightKey: parentView.frame.height,
-                    AVVideoScalingModeKey: AVVideoScalingModeResizeAspectFill,
+                  kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)
                 ]
 
                 videoout.videoSettings = settings
@@ -126,12 +123,6 @@ public class CameraEngine: NSObject {
         return nil
     }
 
-    private var isObjectDetectionOn = false
-
-    public func toggleObjectDetection() {
-
-    }
-
     public func startCapture(){
         _captureQueue.sync {
             if(!self.isCapturing){
@@ -139,7 +130,7 @@ public class CameraEngine: NSObject {
                 _encoder = nil
                 self.isPaused = false
                 _discont = false
-                _timeOffset = CMTime(value: 0, timescale: 0)
+                _timeOffset = CMTime.zero
                 isCapturing = true
             }
         }
@@ -236,11 +227,6 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
 
             var _sampleBuffer = sampleBuffer
             bVideo = connection == self._videoConnection
-            if isObjectDetectionOn && bVideo{
-                _detectorSerialQueue.sync {
-                    self.performObjectDetection(sampleBuffer: sampleBuffer)
-                }
-            }
             if(!self.isCapturing || self.isPaused){
                 return
             }

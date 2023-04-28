@@ -26,14 +26,11 @@ public class CVRecorder {
     var cgSize: CGSize?
 
     var recorderState : RecorderState = .NotReady{
-        didSet{
-            delegate?.didChangedRecorderState(recorderState)
-        }
+        didSet{ delegate?.didChangedRecorderState(recorderState) }
     }
 
     public init(delegate: CVRecorderDelegate){
         self.delegate = delegate
-        
     }
 
 }
@@ -60,10 +57,7 @@ extension CVRecorder{
             fallthrough
         case .Paused:
             recorderState = .Stopped
-            guard let videoUrl = videoUrl,
-                  let cgSize = cgSize else {
-                return
-            }
+            guard let videoUrl = videoUrl, let cgSize = cgSize else { return }
             CameraEngine.shared.stopCapturing { url in
 //                SwiftDuetPlugin.notifyFlutter(event: EventType.VIDEO_RECORDED, arguments: url)
                 url.gridMergeVideos(urlVideo: videoUrl, cGSize: cgSize)
@@ -89,19 +83,6 @@ extension CVRecorder{
             print("************** Not ready ")
         }
     }
-    
-    public func toggleDetection(_ shouldStartDetection: Bool){
-        //        CameraEngine.shared.toggleObjectDetection()
-    }
-    
-    //    public func getCurrentRecorderState() -> RecorderState{
-    //        if let unwrappedRecorderView = recoderView{
-    //            return unwrappedRecorderView.recorderState
-    //        }else{
-    //            return .NotReady
-    //        }
-    //
-    //    }
 }
 
 extension CVRecorder {
@@ -111,7 +92,7 @@ extension CVRecorder {
             recoderView.delegate = self
             self.recoderView = recoderView
         }
-        recoderView.setupCamera(parentViewForPreview!, devicePosition: .back)
+        recoderView.setupCamera(parentViewForPreview!, devicePosition: .front)
     }
 }
 

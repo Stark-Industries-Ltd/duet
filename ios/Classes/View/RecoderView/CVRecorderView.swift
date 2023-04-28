@@ -138,9 +138,9 @@ class CVRecorderView: UIView {
                 AVVideoWidthKey: frame.width,
                 AVVideoHeightKey: frame.height,
                 AVVideoScalingModeKey: AVVideoScalingModeResizeAspectFill,
-//                AVVideoCompressionPropertiesKey: [
-//                    AVVideoAverageBitRateKey: 2300000,
-//                ],
+                AVVideoCompressionPropertiesKey: [
+                    AVVideoAverageBitRateKey: 2300000,
+                ],
             ])
             videoWriterInput.mediaTimeScale = CMTimeScale(bitPattern: 600)
             videoWriterInput.expectsMediaDataInRealTime = true

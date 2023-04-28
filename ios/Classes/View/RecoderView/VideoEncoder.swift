@@ -32,6 +32,9 @@ class VideoEncoder {
                 AVVideoWidthKey: width,
                 AVVideoHeightKey: height,
                 AVVideoScalingModeKey: AVVideoScalingModeResizeAspectFill,
+                AVVideoCompressionPropertiesKey: [
+                    AVVideoAverageBitRateKey: 2300000,
+                ],
             ])
 
             _videoInput.expectsMediaDataInRealTime = true

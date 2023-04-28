@@ -23,7 +23,7 @@ class CameraViewController: UIViewController {
     private var videoURL: URL?
 
     // private ivars
-    private lazy var captureStack = CVRecorder(delegate: self)
+    lazy var captureStack = CVRecorder(delegate: self)
     private var isObjectDetectionEnabled = false
 
     override func viewDidLoad() {
@@ -161,30 +161,17 @@ extension CameraViewController {
     @IBAction func toggleRecording() {
         captureStack.toggleRecording()
         switch captureStack.recorderState {
-        case .Stopped:
-            player?.pause()
-        case .Recording:
-            player?.play()
-        case .Paused:
-            player?.pause()
-        case .NotReady:
-            break
+            case .Stopped:
+                player?.pause()
+            case .Recording:
+                player?.play()
+            case .Paused:
+                player?.pause()
+            case .NotReady:
+                break
         }
     }
 
-    @IBAction func changeCameraPresed() {
-        captureStack.changeCamera()
-    }
-
-    @IBAction func toggleDetection(_ toggleButton: UIButton) {
-        isObjectDetectionEnabled = !isObjectDetectionEnabled
-        if isObjectDetectionEnabled {
-            toggleButton.setImage(UIImage(named: "open"), for: .normal)
-        } else {
-            toggleButton.setImage(UIImage(named: "close"), for: .normal)
-        }
-        captureStack.toggleDetection(isObjectDetectionEnabled)
-    }
 }
 
 
