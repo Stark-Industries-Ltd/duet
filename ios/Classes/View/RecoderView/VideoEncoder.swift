@@ -29,12 +29,9 @@ class VideoEncoder {
             //Add video input
             _videoInput = AVAssetWriterInput(mediaType: AVMediaType.video, outputSettings: [
                 AVVideoCodecKey: AVVideoCodecH264,
-                AVVideoWidthKey: height,
-                AVVideoHeightKey: width,
+                AVVideoWidthKey: width,
+                AVVideoHeightKey: height,
                 AVVideoScalingModeKey: AVVideoScalingModeResizeAspectFill,
-//                AVVideoCompressionPropertiesKey: [
-//                    AVVideoAverageBitRateKey: 2300000,
-//                ],
             ])
 
             _videoInput.expectsMediaDataInRealTime = true
@@ -60,11 +57,11 @@ class VideoEncoder {
         }
     }
     
-    func finishwithCompletionHandler(_ completion: @escaping(()-> Void)){
+    func finishwithCompletionHandler(_ completion: @escaping((URL) -> Void)){
         _writer.finishWriting {
             let url = self._writer.outputURL
             self.saveVideoToAlbum(videoUrl: url)
-            completion()
+            completion(url)
         }
     }
     
@@ -80,13 +77,13 @@ class VideoEncoder {
         }
         
         if (_writer.status == .failed){
-            debugPrint("_writer error \(_writer.error?.localizedDescription)")
+            print("_writer error \(_writer.error?.localizedDescription)")
             return false
         }
         
         if isVideo{
             if (_videoInput.isReadyForMoreMediaData == true){
-                debugPrint("<<<<<<<<<<<<<<  _videoInput.append(sampleBuffer)")
+//                print("<<<<<<<<<<<<<<  _videoInput.append(sampleBuffer)")
                 _videoInput.append(sampleBuffer)
                 return true
             }
@@ -105,7 +102,7 @@ class VideoEncoder {
     
 }
 
-extension VideoEncoder{
+extension VideoEncoder {
     private func saveVideoToAlbum(videoUrl: URL) {
         var info = ""
         PHPhotoLibrary.shared().performChanges({

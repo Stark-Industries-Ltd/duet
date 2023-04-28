@@ -22,6 +22,8 @@ public class CVRecorder {
     private weak var delegate: CVRecorderDelegate?
     private weak var parentViewForPreview: UIView?
     private var recoderView: CVRecorderView!
+    var videoUrl: URL?
+    var cgSize: CGSize?
 
     var recorderState : RecorderState = .NotReady{
         didSet{
@@ -58,7 +60,14 @@ extension CVRecorder{
             fallthrough
         case .Paused:
             recorderState = .Stopped
-            CameraEngine.shared.stopCapturing()
+            guard let videoUrl = videoUrl,
+                  let cgSize = cgSize else {
+                return
+            }
+            CameraEngine.shared.stopCapturing { url in
+//                SwiftDuetPlugin.notifyFlutter(event: EventType.VIDEO_RECORDED, arguments: url)
+                url.gridMergeVideos(urlVideo: videoUrl, cGSize: cgSize)
+            }
         case .NotReady:
             print("************** Not ready ")
         }

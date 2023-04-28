@@ -145,7 +145,7 @@ public class CameraEngine: NSObject {
         }
     }
 
-    public func stopCapturing(){
+    public func stopCapturing(_ completion: @escaping((URL) -> Void)) {
         _captureQueue.sync {
             if(self.isCapturing){
                 print("<<<<<<<<< stop capturing")
@@ -153,11 +153,12 @@ public class CameraEngine: NSObject {
                 //serialize with audio and video capture
                 self.isCapturing = false
                 _captureQueue.async {
-                    self._encoder.finishwithCompletionHandler {
+                    self._encoder.finishwithCompletionHandler { url in
                         DispatchQueue.main.async {
                             self.isCapturing = false
                             self._encoder = nil
                         }
+                        completion(url)
                     }
                 }
             }
@@ -183,13 +184,13 @@ public class CameraEngine: NSObject {
         }
     }
 
-    public func shutdown(){
+    public func shutdown() {
         print("Shutting down camera server")
         if _session != nil {
             _session.stopRunning()
             _session = nil
         }
-        _encoder.finishwithCompletionHandler {
+        _encoder.finishwithCompletionHandler { url in
             print("Capture completed")
         }
     }
