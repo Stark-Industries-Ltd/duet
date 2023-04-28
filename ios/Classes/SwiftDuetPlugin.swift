@@ -22,7 +22,7 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
       switch(call.method){
       case "RECORD":
           result("RECORD result from native")
-          FLNativeView.controller?.record()
+//          FLNativeView.controller?.record()
           break
       case "RESET":
           result("RESET result from native")
