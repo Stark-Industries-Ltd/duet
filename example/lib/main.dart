@@ -15,7 +15,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final url =
-      'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4';
+      'https://firebasestorage.googleapis.com/v0/b/dodgebot-ac55b.appspot.com/o/manhdz.mp4?alt=media&token=7816fb77-2321-4dc8-ab36-9b36737dca9f';
   final _duetPlugin = Duet();
 
   @override
