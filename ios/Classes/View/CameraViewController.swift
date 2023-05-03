@@ -35,17 +35,17 @@ class CameraViewController: UIViewController {
 
         //2. Create AVPlayer object
         var asset: AVAsset
-        if let url = viewArgs?.url {
-            asset = AVAsset(url: url)
-            videoURL = url
-        } else {
+//        if let url = viewArgs?.url {
+//            asset = AVAsset(url: url)
+//            videoURL = url
+//        } else {
             guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
                 print("video.m4v not found")
                 return
             }
             asset = AVAsset(url: URL(fileURLWithPath: path))
             videoURL = URL(fileURLWithPath: path)
-        }
+//        }
         //2. Create AVPlayer object
         let videoSize = asset.videoSize
         let playerItem = AVPlayerItem(asset: asset)

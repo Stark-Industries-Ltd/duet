@@ -75,7 +75,7 @@ public class CameraEngine: NSObject {
                 ]
 
                 videoout.videoSettings = settings
-                videoout.alwaysDiscardsLateVideoFrames = true
+                videoout.alwaysDiscardsLateVideoFrames = false
                 _session.addOutput(videoout)
                 videoout.connection(with: AVMediaType.video)?.videoOrientation = .portrait
                 _videoConnection = videoout.connection(with: .video)

@@ -283,7 +283,7 @@ extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptu
     
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         
-        
+        print("HAUTV 123123")
         guard output != nil,
               sampleBuffer != nil,
               connection != nil,
