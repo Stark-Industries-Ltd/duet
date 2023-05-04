@@ -68,6 +68,8 @@ extension CVRecorder{
         
     }
     
+    
+    
     public func togglePauseResumeRecording(){
         //        recoderView.togglePauseRecording()
         switch recorderState {

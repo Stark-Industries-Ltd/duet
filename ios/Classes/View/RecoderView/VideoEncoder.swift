@@ -15,7 +15,7 @@ class VideoEncoder {
     private let _writer: AVAssetWriter!
     private let _videoInput : AVAssetWriterInput!
     private let _audioInput : AVAssetWriterInput!
-    
+    private let _audioRecorder = AudioRecorder()
     
     init(path: URL, height: Int, width: Int, channels: Int, samples: Float64) throws{
         self.path = path
@@ -61,14 +61,19 @@ class VideoEncoder {
     }
     
     func finishwithCompletionHandler(_ completion: @escaping((URL) -> Void)){
-        _writer.finishWriting {
-            let url = self._writer.outputURL
-            self.saveVideoToAlbum(videoUrl: url)
-            completion(url)
-        }
+                _writer.finishWriting {
+                    let url = self._writer.outputURL
+                    self.saveVideoToAlbum(videoUrl: url)
+                    completion(url)
+                    self._audioRecorder.finishRecording { url in
+                        print("AUDIO URL <<< \(url)" )
+                        if let vc = FLNativeView.controller {
+                            url.presentShareActivity(viewController: vc)
+                        }
+                        
+                    }
+                }
     }
-    
-    
     
     func encodeFrame(sampleBuffer: CMSampleBuffer, isVideo: Bool) -> Bool{
         
@@ -77,6 +82,7 @@ class VideoEncoder {
             let startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             _writer.startWriting()
             _writer.startSession(atSourceTime: startTime)
+            _audioRecorder.startRecording()
         }
         
         if (_writer.status == .failed){

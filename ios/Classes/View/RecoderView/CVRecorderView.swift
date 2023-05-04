@@ -22,7 +22,7 @@ protocol VideoCaptureDelegate: AnyObject {
     func videoCaptureStateDidChanged(_ currentState: RecorderState)
 }
 
-class CVRecorderView: UIView {
+class CVRecorderView: UIView, AVAudioRecorderDelegate {
     fileprivate lazy var cameraSession = AVCaptureSession()
     fileprivate lazy var videoDataOutput = AVCaptureVideoDataOutput()
     fileprivate lazy var audioDataOutput = AVCaptureAudioDataOutput()
@@ -116,8 +116,7 @@ class CVRecorderView: UIView {
             recorderState = .Stopped
             cameraSession.startRunning()
             
-        }
-        catch let error {
+        } catch let error {
             recorderState = .NotReady
             debugPrint(error.localizedDescription)
         }
@@ -282,8 +281,6 @@ extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptu
     
     
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        
-        print("HAUTV 123123")
         guard output != nil,
               sampleBuffer != nil,
               connection != nil,
