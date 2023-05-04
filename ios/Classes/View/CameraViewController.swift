@@ -2,8 +2,7 @@
 //  ViewController.swift
 //  CustomCamera
 //
-//  Created by Taras Chernyshenko on 6/27/17.
-//  Copyright © 2017 Taras Chernyshenko. All rights reserved.
+//  Created by DucManh on 27/04/2023.
 //
 
 import UIKit
@@ -17,6 +16,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var cameraPreviewContainer: UIView!
     @IBOutlet private weak var togglePauseResumeButton : UIButton?
     @IBOutlet private weak var toggleRecordingButton : UIButton?
+    @IBOutlet weak var heightContraintCamera: NSLayoutConstraint!
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
     private var player: AVPlayer?
     var viewArgs: DuetViewArgs?
@@ -28,6 +28,10 @@ class CameraViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         initVideo()
     }
 
@@ -48,15 +52,16 @@ class CameraViewController: UIViewController {
 //        }
         //2. Create AVPlayer object
         let videoSize = asset.videoSize
-        let playerItem = AVPlayerItem(asset: asset)
         let ratio = videoSize.height / videoSize.width
-        self.player = AVPlayer(playerItem: playerItem)
+        self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
         let playerLayer = AVPlayerLayer(player: player)
-        let withScreen = UIScreen.main.bounds.width
-        heightContraintVideo.constant = withScreen * ratio
+        let width = UIScreen.main.bounds.width / 2
+        let height = width * ratio
+        heightContraintCamera.constant = height
+        heightContraintVideo.constant = height
         playerLayer.frame = CGRect(x: 0, y: 0,
-                                   width: withScreen,
-                                   height: withScreen * ratio)
+                                   width: width,
+                                   height: height)
         self.videoView.layer.addSublayer(playerLayer)
     }
 
@@ -85,7 +90,7 @@ class CameraViewController: UIViewController {
 
 extension CameraViewController {
 
-    private func updatePauseResumeControl(_ currentRecorderState: RecorderState){
+    private func updatePauseResumeControl(_ currentRecorderState: RecorderState) {
         switch currentRecorderState {
         case .Paused:
             togglePauseResumeButton?.isUserInteractionEnabled = true
@@ -133,11 +138,12 @@ extension CameraViewController {
     }
 
     private func setupCaptureStack() {
-        let width = self.view.frame.width
-        let height = self.view.frame.height - UIApplication.shared.statusBarFrame.height
-        captureStack.videoUrl = videoURL
-        captureStack.cgSize = CGSize(width: width, height: height)
-        captureStack.loadCaptureStack(parentViewForPreview: cameraPreviewContainer)
+        let width = UIScreen.main.bounds.width
+        let height = heightContraintCamera.constant
+        let cgSize = CGSize(width: width, height: height)
+        captureStack.loadCaptureStack(parentViewForPreview: cameraPreviewContainer,
+                                      videoUrl: videoURL,
+                                      cgSize: cgSize)
         print(cameraPreviewContainer.frame.width)
         print(cameraPreviewContainer.frame.height)
     }
@@ -174,8 +180,7 @@ extension CameraViewController {
 
 }
 
-
-extension CameraViewController: CVRecorderDelegate{
+extension CameraViewController: CVRecorderDelegate {
     func didChangedCamera(_ currentCameraPosition: AVCaptureDevice.Position) {
         switch currentCameraPosition {
         case .unspecified:

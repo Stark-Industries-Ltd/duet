@@ -2,7 +2,7 @@
 //  CVRecorder.swift
 //  CVRecorder
 //
-//  Created by Ankit Sachan on 04/05/22.
+//  Created by DucManh on 27/04/2023.
 //
 
 import UIKit
@@ -11,44 +11,39 @@ import AVFoundation
 import Vision
 
 public protocol CVRecorderDelegate: AnyObject {
-    func didChangedCamera(_ currentCameraPosition: AVCaptureDevice.Position)
-    //    func didStartedRecording()
     func didChangedRecorderState(_ currentRecorderState:  RecorderState)
 }
 
-
 public class CVRecorder {
-    //private ivars
     private weak var delegate: CVRecorderDelegate?
     private weak var parentViewForPreview: UIView?
     private var recoderView: CVRecorderView!
-    var videoUrl: URL?
-    var cgSize: CGSize?
+    private var videoUrl: URL?
+    private var cgSize: CGSize?
 
-    var recorderState : RecorderState = .NotReady{
-        didSet{ delegate?.didChangedRecorderState(recorderState) }
+    var recorderState: RecorderState = .NotReady {
+        didSet {
+            delegate?.didChangedRecorderState(recorderState)
+        }
     }
 
-    public init(delegate: CVRecorderDelegate){
+    public init(delegate: CVRecorderDelegate) {
         self.delegate = delegate
     }
-
 }
 
-//Public interfaces
-extension CVRecorder{
-    public func loadCaptureStack(parentViewForPreview: UIView){
+extension CVRecorder {
+    public func loadCaptureStack(parentViewForPreview: UIView,
+                                 videoUrl: URL?,
+                                 cgSize: CGSize) {
         self.parentViewForPreview = parentViewForPreview
+        self.videoUrl = videoUrl
+        self.cgSize = cgSize
         CameraEngine.shared.startup(parentViewForPreview, devicePosition: .front)
         recorderState = .Stopped
     }
-    
-    public func changeCamera(){
-        //        recoderView.changeCamera()
-        print("<<<<<<<<<<< TBD: for Camera engine")
-    }
-    
-    public func toggleRecording(){
+
+    public func toggleRecording() {
         switch recorderState {
         case .Stopped:
             recorderState = .Recording
@@ -59,19 +54,14 @@ extension CVRecorder{
             recorderState = .Stopped
             guard let videoUrl = videoUrl, let cgSize = cgSize else { return }
             CameraEngine.shared.stopCapturing { url in
-//                SwiftDuetPlugin.notifyFlutter(event: EventType.VIDEO_RECORDED, arguments: url)
                 url.gridMergeVideos(urlVideo: videoUrl, cGSize: cgSize)
             }
         case .NotReady:
             print("************** Not ready ")
         }
-        
     }
-    
-    
-    
-    public func togglePauseResumeRecording(){
-        //        recoderView.togglePauseRecording()
+
+    public func togglePauseResumeRecording() {
         switch recorderState {
         case .Stopped:
             print("************** pause should not be available while camera is not recording thus check the UI ")
@@ -89,24 +79,26 @@ extension CVRecorder{
 
 extension CVRecorder {
     func prepareRecorderView() {
-        if recoderView == nil{
-            let recoderView = CVRecorderView(frame: parentViewForPreview!.bounds)
+        guard let parentViewForPreview = parentViewForPreview else {
+            return
+        }
+        if recoderView == nil {
+            let recoderView = CVRecorderView(frame: parentViewForPreview.bounds)
             recoderView.delegate = self
             self.recoderView = recoderView
         }
-        recoderView.setupCamera(parentViewForPreview!, devicePosition: .front)
+        recoderView.setupCamera(parentViewForPreview, devicePosition: .front)
     }
 }
 
-extension CVRecorder : VideoCaptureDelegate{
+extension CVRecorder: VideoCaptureDelegate {
     func videoCaptureDidChangedCamera(currentCameraPosition: AVCaptureDevice.Position) {
-        delegate?.didChangedCamera(currentCameraPosition)
     }
-    
+
     func videoCaptureStateDidChanged(_ currentState: RecorderState) {
         delegate?.didChangedRecorderState(currentState)
     }
-    
+
     func videoCapture(_ capture: CVRecorderView, didCaptureVideoFrame: CVPixelBuffer?, timestamp: CMTime) {
         
     }

@@ -2,7 +2,7 @@
 //  CameraEngine.swift
 //  CVRecorder
 //
-//  Created by Ankit Sachan on 09/05/22.
+//  Created by DucManh on 27/04/2023.
 //
 
 import UIKit
@@ -15,8 +15,6 @@ import Vision
 public class CameraEngine: NSObject {
 
     public static let shared = CameraEngine()
-
-
     private var _session: AVCaptureSession!
     private var _preview: AVCaptureVideoPreviewLayer!
     private var _captureQueue : DispatchQueue!
@@ -71,7 +69,7 @@ public class CameraEngine: NSObject {
                 let videoout = AVCaptureVideoDataOutput()
                 videoout.setSampleBufferDelegate(self, queue: _captureQueue)
                 let settings: [String : Any] = [
-                  kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)
+                    kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)
                 ]
 
                 videoout.videoSettings = settings
@@ -113,7 +111,8 @@ public class CameraEngine: NSObject {
     }
 
     func cameraWithPosition(position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .unspecified)
+        let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera],
+                                                                mediaType: AVMediaType.video, position: .unspecified)
         for device in discoverySession.devices {
             if device.position == position {
                 return device
@@ -123,9 +122,9 @@ public class CameraEngine: NSObject {
         return nil
     }
 
-    public func startCapture(){
+    public func startCapture() {
         _captureQueue.sync {
-            if(!self.isCapturing){
+            if self.isCapturing {
                 print("<<<<<<<<< Start capturing")
                 _encoder = nil
                 self.isPaused = false
@@ -138,7 +137,7 @@ public class CameraEngine: NSObject {
 
     public func stopCapturing(_ completion: @escaping((URL) -> Void)) {
         _captureQueue.sync {
-            if(self.isCapturing){
+            if(self.isCapturing) {
                 print("<<<<<<<<< stop capturing")
                 _currentFile += 1
                 //serialize with audio and video capture
@@ -166,9 +165,9 @@ public class CameraEngine: NSObject {
         }
     }
 
-    public func resumeCapture(){
+    public func resumeCapture() {
         _captureQueue.sync {
-            if(self.isCapturing){
+            if self.isCapturing {
                 print("<<<<<<<<< resuming capture")
                 self.isPaused = false
             }
@@ -186,17 +185,14 @@ public class CameraEngine: NSObject {
         }
     }
 
-    public func getPreviewLayr() ->AVCaptureVideoPreviewLayer{
+    public func getPreviewLayr() ->AVCaptureVideoPreviewLayer {
         return _preview
     }
 }
 
+extension CameraEngine: AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
 
-
-
-extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
-
-    func adjustTime(sampleBuffer: CMSampleBuffer, by offset: CMTime) -> CMSampleBuffer?{
+    func adjustTime(sampleBuffer: CMSampleBuffer, by offset: CMTime) -> CMSampleBuffer? {
         var out:CMSampleBuffer?
         var count:CMItemCount = CMSampleBufferGetNumSamples(sampleBuffer)
         let pInfo = UnsafeMutablePointer<CMSampleTimingInfo>.allocate(capacity: count)
@@ -214,7 +210,7 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
     func setAudioFormat(fmt: CMFormatDescription) {
         let asbd = CMAudioFormatDescriptionGetStreamBasicDescription(fmt)
 
-        _sampleRate = asbd!.pointee.mSampleRate // breakpoint
+        _sampleRate = asbd!.pointee.mSampleRate
         _channels = Int(asbd!.pointee.mChannelsPerFrame)
     }
 
@@ -223,8 +219,6 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
                               from connection: AVCaptureConnection) {
         var bVideo = true
         serialQueue.sync {
-            //        _captureQueue.sync {
-
             var _sampleBuffer = sampleBuffer
             bVideo = connection == self._videoConnection
             if(!self.isCapturing || self.isPaused){
@@ -234,7 +228,8 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
             if(self._encoder == nil && !bVideo) {
                 let fmt = CMSampleBufferGetFormatDescription(_sampleBuffer)!
                 self.setAudioFormat(fmt: fmt)
-                let path = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("video.mp4")
+                let userDomainMask = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                let path = userDomainMask.first!.appendingPathComponent("video.mp4")
                 if FileManager.default.isDeletableFile(atPath: path.path) {
                     do {
                         // delete old video
@@ -252,14 +247,14 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
                         channels: self._channels,
                         samples: self._sampleRate
                     )
-                }catch (let error){
+                } catch (let error) {
                     print("*************** \(error.localizedDescription)")
                     return
                 }
             }
 
-            if (self._discont){
-                if (bVideo){
+            if (self._discont) {
+                if (bVideo) {
                     return
                 }
                 self._discont = false
@@ -275,9 +270,9 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
                     let offset = CMTimeSubtract(pts, last!)
                     print("Setting offset from \(bVideo ? "video": "audio")")
                     // this stops us having to set a scale for _timeOffset before we see the first video time
-                    if self._timeOffset.value == 0{
+                    if self._timeOffset.value == 0 {
                         self._timeOffset = offset
-                    }else{
+                    } else {
                         self._timeOffset = CMTimeAdd(self._timeOffset, offset)
                     }
                     self._lastAudio.flags = []
@@ -286,8 +281,8 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
                 }
             }
 
-            if (self._timeOffset.value > 0){
-                if let unwrappedAdjustedBuffer = self.adjustTime(sampleBuffer: _sampleBuffer, by: self._timeOffset){
+            if (self._timeOffset.value > 0) {
+                if let unwrappedAdjustedBuffer = self.adjustTime(sampleBuffer: _sampleBuffer, by: self._timeOffset) {
                     _sampleBuffer = unwrappedAdjustedBuffer
                 }else{
                     print("<<<<<<<< unable to adjust the buffer")
@@ -297,28 +292,22 @@ extension CameraEngine : AVCaptureAudioDataOutputSampleBufferDelegate, AVCapture
             // record most recent time so we know the length of the pause
             var pts = CMSampleBufferGetPresentationTimeStamp(_sampleBuffer)
             let duration = CMSampleBufferGetDuration(_sampleBuffer)
-            if duration.value > 0{
+            if duration.value > 0 {
                 pts = CMTimeAdd(pts, duration)
             }
 
-            if(bVideo){
+            if(bVideo) {
                 self._lastVideo = pts
-            }else{
+            } else {
                 self._lastAudio = pts
             }
             //pass frame to encoder
-            if self._encoder != nil{
-                self._encoder.encodeFrame(sampleBuffer: _sampleBuffer, isVideo: bVideo)
+            if self._encoder != nil {
+                let _ = self._encoder.encodeFrame(sampleBuffer: _sampleBuffer, isVideo: bVideo)
             }
-
         }
     }
-
-    private func performObjectDetection(sampleBuffer: CMSampleBuffer){
-
-    }
 }
-
 
 extension CMSampleBuffer {
     func resize(_ destSize: CGSize)-> CVPixelBuffer? {
@@ -331,18 +320,32 @@ extension CMSampleBuffer {
         let height = CGFloat(CVPixelBufferGetHeight(imageBuffer))
         let width = CGFloat(CVPixelBufferGetWidth(imageBuffer))
         var pixelBuffer: CVPixelBuffer?
-        let options = [kCVPixelBufferCGImageCompatibilityKey:true,
-               kCVPixelBufferCGBitmapContextCompatibilityKey:true]
+        let options = [
+            kCVPixelBufferCGImageCompatibilityKey: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey: true
+        ]
         let topMargin = (height - destSize.height) / CGFloat(2)
         let leftMargin = (width - destSize.width) * CGFloat(2)
         let baseAddressStart = Int(bytesPerRow * topMargin + leftMargin)
-        let addressPoint = baseAddress!.assumingMemoryBound(to: UInt8.self)
-        let status = CVPixelBufferCreateWithBytes(kCFAllocatorDefault, Int(destSize.width), Int(destSize.height), kCVPixelFormatType_32BGRA, &addressPoint[baseAddressStart], Int(bytesPerRow), nil, nil, options as CFDictionary, &pixelBuffer)
+        guard let baseAddress = baseAddress else {
+            return nil
+        }
+        let addressPoint = baseAddress.assumingMemoryBound(to: UInt8.self)
+        let status = CVPixelBufferCreateWithBytes(kCFAllocatorDefault,
+                                                  Int(destSize.width),
+                                                  Int(destSize.height),
+                                                  kCVPixelFormatType_32BGRA,
+                                                  &addressPoint[baseAddressStart],
+                                                  Int(bytesPerRow),
+                                                  nil,
+                                                  nil,
+                                                  options as CFDictionary,
+                                                  &pixelBuffer)
         if (status != 0) {
             print(status)
-            return nil;
+            return nil
         }
         CVPixelBufferUnlockBaseAddress(imageBuffer,CVPixelBufferLockFlags(rawValue: 0))
-        return pixelBuffer;
+        return pixelBuffer
     }
 }

@@ -2,7 +2,7 @@
 //  VideoEncoder.swift
 //  CVRecorder
 //
-//  Created by Ankit Sachan on 09/05/22.
+//  Created by DucManh on 27/04/2023.
 //
 
 import Foundation
@@ -10,16 +10,15 @@ import AVFoundation
 import Photos
 
 class VideoEncoder {
-    let path : URL
-    
+    let path: URL
     private let _writer: AVAssetWriter!
-    private let _videoInput : AVAssetWriterInput!
-    private let _audioInput : AVAssetWriterInput!
+    private let _videoInput: AVAssetWriterInput!
+    private let _audioInput: AVAssetWriterInput!
     private let _audioRecorder = AudioRecorder()
     
-    init(path: URL, height: Int, width: Int, channels: Int, samples: Float64) throws{
+    init(path: URL, height: Int, width: Int, channels: Int, samples: Float64) throws {
         self.path = path
-        do{
+        do {
             if FileManager.default.fileExists(atPath: path.path){
                 try FileManager.default.removeItem(at: path)
             }
@@ -36,12 +35,10 @@ class VideoEncoder {
                     AVVideoAverageBitRateKey: 2300000,
                 ],
             ])
-
             _videoInput.expectsMediaDataInRealTime = true
             if _writer.canAdd(_videoInput) {
                 _writer.add(_videoInput)
             }
-
             // add audio
             _audioInput = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
@@ -53,62 +50,57 @@ class VideoEncoder {
             if _writer.canAdd(_audioInput) {
                 _writer.add(_audioInput)
             }
-            
-        }catch (let error){
+        } catch (let error) {
             print("<<<<<<<<<< error obserevd \(error.localizedDescription)")
             throw error
         }
     }
-    
-    func finishwithCompletionHandler(_ completion: @escaping((URL) -> Void)){
-                _writer.finishWriting {
-                    let url = self._writer.outputURL
-                    self.saveVideoToAlbum(videoUrl: url)
-                    completion(url)
-                    self._audioRecorder.finishRecording { url in
-                        print("AUDIO URL <<< \(url)" )
-                        if let vc = FLNativeView.controller {
-                            url.presentShareActivity(viewController: vc)
-                        }
-                        
-                    }
+
+    func finishwithCompletionHandler(_ completion: @escaping((URL) -> Void)) {
+        _writer.finishWriting {
+            let url = self._writer.outputURL
+            self.saveVideoToAlbum(videoUrl: url)
+            completion(url)
+            self._audioRecorder.finishRecording { url in
+                print("AUDIO URL <<< \(url)" )
+                if let vc = FLNativeView.controller {
+                    url.presentShareActivity(viewController: vc)
                 }
+            }
+        }
     }
-    
-    func encodeFrame(sampleBuffer: CMSampleBuffer, isVideo: Bool) -> Bool{
-        
-        if (_writer.status == .unknown){
-            print("<<<<<<<<<<<<< encodeFrame startWriting \(isVideo)")
+
+    func encodeFrame(sampleBuffer: CMSampleBuffer, isVideo: Bool) -> Bool {
+        if (_writer.status == .unknown) {
             let startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             _writer.startWriting()
             _writer.startSession(atSourceTime: startTime)
             _audioRecorder.startRecording()
         }
-        
-        if (_writer.status == .failed){
-            print("_writer error \(_writer.error?.localizedDescription)")
+
+        if (_writer.status == .failed) {
+            print("_writer failed \(_writer.error?.localizedDescription ?? "")")
             return false
         }
-        
-        if isVideo{
-            if (_videoInput.isReadyForMoreMediaData == true){
-//                print("<<<<<<<<<<<<<<  _videoInput.append(sampleBuffer)")
+
+        if isVideo {
+            if (_videoInput.isReadyForMoreMediaData == true) {
                 _videoInput.append(sampleBuffer)
                 return true
             }
-        }else{
-            if(_audioInput.isReadyForMoreMediaData){
+        } else {
+            if(_audioInput.isReadyForMoreMediaData) {
                 _audioInput.append(sampleBuffer)
                 return true
             }
         }
         return false
     }
-    
+
     deinit{
         debugPrint("_encoder deinitialized")
     }
-    
+
 }
 
 extension VideoEncoder {
@@ -118,14 +110,11 @@ extension VideoEncoder {
             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl)
         }) { (success, error) in
             if success {
-                info = "hello"
+                info = "success"
             } else {
-                info = "保存失败，err = \(error.debugDescription)"
+                info = "Error = \(error.debugDescription)"
             }
-            
             print(info)
-            
-            
         }
     }
 }

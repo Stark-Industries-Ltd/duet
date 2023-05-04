@@ -2,14 +2,14 @@
 //  CVRecorderView.swift
 //  CVRecorder
 //
-//  Created by Ankit Sachan on 04/05/22.
+//  Created by DucManh on 27/04/2023.
 //
 
 import UIKit
 import AVFoundation
 import Photos
 
-public enum RecorderState : Int{
+public enum RecorderState: Int {
     case Stopped = 0
     case Recording
     case Paused
@@ -27,8 +27,7 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
     fileprivate lazy var videoDataOutput = AVCaptureVideoDataOutput()
     fileprivate lazy var audioDataOutput = AVCaptureAudioDataOutput()
     private var previewLayer : AVCaptureVideoPreviewLayer!
-    private var isUsingFrontFacingCamera : Bool = false
-    
+
     fileprivate var videoWriter: AVAssetWriter!
     fileprivate var videoWriterInput: AVAssetWriterInput!
     fileprivate var audioWriterInput: AVAssetWriterInput!
@@ -38,51 +37,49 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
     public weak var delegate: VideoCaptureDelegate?
     public var fps = 15
     
-    var currentCameraInput : AVCaptureDeviceInput!
-    var cameraDevice : AVCaptureDevice?
+    var currentCameraInput: AVCaptureDeviceInput!
+    var cameraDevice: AVCaptureDevice?
     
-    var recorderState : RecorderState = .NotReady{
+    var recorderState: RecorderState = .NotReady {
         didSet{
             delegate?.videoCaptureStateDidChanged(recorderState)
         }
     }
     
-    var encoder : VideoEncoder!
-    var _timeOffset : CMTime!
-    var _channels :  Int!
-    var _sampleRate : Float64!
-    var _currentFile : Int = 0
-    var _discont : Bool = true
+    var encoder: VideoEncoder!
+    var _timeOffset: CMTime!
+    var _channels:  Int!
+    var _sampleRate: Float64!
+    var _currentFile: Int = 0
+    var _discont: Bool = true
     
-    var _lastVideo : CMTime!
-    var _lastAudio : CMTime!
+    var _lastVideo: CMTime!
+    var _lastAudio: CMTime!
     
     func setupCamera(_ parentView: UIView,  devicePosition: AVCaptureDevice.Position) {
         cameraSession.sessionPreset = .photo
 
         cameraDevice = cameraWithPosition(position: devicePosition)
 
-        
-        
         //Setup your microphone
         let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)
-        
+
         do {
             cameraSession.beginConfiguration()
-            
+
             // Add camera to your session
             let deviceInput = try AVCaptureDeviceInput(device: cameraDevice!)
             if cameraSession.canAddInput(deviceInput) {
                 cameraSession.addInput(deviceInput)
                 currentCameraInput = deviceInput
             }
-            
+
             // Add microphone to your session
             let audioInput = try AVCaptureDeviceInput(device: audioDevice!)
             if cameraSession.canAddInput(audioInput) {
                 cameraSession.addInput(audioInput)
             }
-            
+
             //Now we should define your output data
             let queue = DispatchQueue(label: "com.cvcamrecorder.record-video.data-output")
 
@@ -92,43 +89,41 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
                 cameraSession.addOutput(videoDataOutput)
             }
             videoDataOutput.connection(with: AVMediaType.video)?.videoOrientation = .portrait
-            
+
             //Define your audio output
             if cameraSession.canAddOutput(audioDataOutput) {
                 audioDataOutput.setSampleBufferDelegate(self, queue: queue)
                 cameraSession.addOutput(audioDataOutput)
             }
-            
+
             cameraSession.commitConfiguration()
-            
+
             //Present the preview of video
             previewLayer = AVCaptureVideoPreviewLayer(session: cameraSession)
             previewLayer.frame = frame
             previewLayer.bounds = bounds
             previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-            //            ResizeAspectFill
             layer.addSublayer(previewLayer)
-            
+
             parentView.layer.addSublayer(layer)
-            
+
             //Don't forget start running your session
             //this doesn't mean start record!
             recorderState = .Stopped
             cameraSession.startRunning()
-            
         } catch let error {
             recorderState = .NotReady
             debugPrint(error.localizedDescription)
         }
     }
-    
+
     private var _filename = ""
-    
+
     func setupWriter() {
         do {
             _filename = UUID().uuidString
-            let videoPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("\(_filename).mp4")
-            //          let url = AssetUtils.outputAssetURL(mediaType: .video)
+            let userDomainMask = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+            let videoPath = userDomainMask.first!.appendingPathComponent("\(_filename).mp4")
             videoWriter = try AVAssetWriter(url: videoPath, fileType: AVFileType.mp4)
             
             //Add video input
@@ -143,13 +138,11 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
             ])
             videoWriterInput.mediaTimeScale = CMTimeScale(bitPattern: 600)
             videoWriterInput.expectsMediaDataInRealTime = true
-            //            videoWriterInput.transform = CGAffineTransform(rotationAngle: .pi/2)
-            
-            videoWriterInput.expectsMediaDataInRealTime = true //Make sure we are exporting data at realtime
+            videoWriterInput.expectsMediaDataInRealTime = true
             if videoWriter.canAdd(videoWriterInput) {
                 videoWriter.add(videoWriterInput)
             }
-            
+
             //Add audio input
             audioWriterInput = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: [
                 AVFormatIDKey: kAudioFormatMPEG4AAC,
@@ -161,8 +154,7 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
             if videoWriter.canAdd(audioWriterInput) {
                 videoWriter.add(audioWriterInput)
             }
-            
-            videoWriter.startWriting() //Means ready to write down the file
+            videoWriter.startWriting()
         }
         catch let error {
             debugPrint(error.localizedDescription)
@@ -170,10 +162,8 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
     }
 }
 
-
-
 extension CVRecorderView {
-    
+
     func cameraWithPosition(position: AVCaptureDevice.Position) -> AVCaptureDevice? {
         let discoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInWideAngleCamera], mediaType: AVMediaType.video, position: .unspecified)
         for device in discoverySession.devices {
@@ -181,20 +171,16 @@ extension CVRecorderView {
                 return device
             }
         }
-        
         return nil
     }
-    
-
     
 }
 
 extension CVRecorderView{
-    func toggleRecording(){
-        switch recorderState{
+    func toggleRecording() {
+        switch recorderState {
         case .Stopped:
             print("start recording")
-            
             encoder = nil
             _timeOffset = CMTime(value: 0, timescale: 0)
             _discont = false
@@ -210,8 +196,8 @@ extension CVRecorderView{
             print("error should not have received toggle pause command when NotReady")
         }
     }
-    
-    func togglePauseRecording(){
+
+    func togglePauseRecording() {
         switch recorderState{
         case .Stopped:
             print("error should not have received toggle pause command when stopped")
@@ -226,7 +212,6 @@ extension CVRecorderView{
             print("error should not have received toggle pause command when NotReady")
         }
     }
-    
 }
 
 extension CVRecorderView {

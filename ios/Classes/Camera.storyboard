@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
-    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <device id="ipad12_9rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
@@ -14,28 +14,24 @@
             <objects>
                 <viewController storyboardIdentifier="CameraID" id="usq-Z0-sp6" customClass="CameraViewController" customModule="duet" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ocI-tb-bje">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="1024" height="1366"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oBj-2c-qyq">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="0.0"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dpz-yQ-ceI">
+                                <rect key="frame" x="512" y="435" width="512" height="500"/>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" id="1p5-tT-NXY"/>
+                                    <constraint firstAttribute="height" constant="500" id="vFz-Ef-50k"/>
                                 </constraints>
                             </view>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="dpz-yQ-ceI">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </view>
                             <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="1hh-8h-I2s">
-                                <rect key="frame" x="0.0" y="567" width="375" height="100"/>
+                                <rect key="frame" x="0.0" y="1246" width="1024" height="100"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tYI-1Q-J7X" userLabel="Pause Container">
-                                        <rect key="frame" x="0.0" y="0.0" width="187.5" height="100"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="512" height="100"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2HO-Vp-gsB">
-                                                <rect key="frame" x="56.5" y="25" width="75" height="50"/>
+                                                <rect key="frame" x="218.5" y="25" width="75" height="50"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="50" id="5Ya-lr-h43"/>
                                                 </constraints>
@@ -53,10 +49,10 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hnu-T3-amL" userLabel="Start Stop Container">
-                                        <rect key="frame" x="187.5" y="0.0" width="187.5" height="100"/>
+                                        <rect key="frame" x="512" y="0.0" width="512" height="100"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OXT-yA-kM3">
-                                                <rect key="frame" x="56.5" y="25" width="75" height="50"/>
+                                                <rect key="frame" x="218.5" y="25" width="75" height="50"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="50" id="fQz-HH-OUb"/>
                                                 </constraints>
@@ -78,26 +74,33 @@
                                     <constraint firstAttribute="height" constant="100" id="1Ou-4J-qS8"/>
                                 </constraints>
                             </stackView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oBj-2c-qyq">
+                                <rect key="frame" x="0.0" y="435" width="512" height="500"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="500" id="tUP-2X-QdE"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6bV-1e-PCq"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstItem="dpz-yQ-ceI" firstAttribute="top" secondItem="oBj-2c-qyq" secondAttribute="bottom" id="3Pb-Xz-SMN"/>
+                            <constraint firstItem="oBj-2c-qyq" firstAttribute="width" secondItem="ocI-tb-bje" secondAttribute="width" multiplier="1/2" id="8b2-Rj-RVt"/>
+                            <constraint firstItem="dpz-yQ-ceI" firstAttribute="width" secondItem="ocI-tb-bje" secondAttribute="width" multiplier="1/2" id="B6D-JT-Hnl"/>
                             <constraint firstItem="6bV-1e-PCq" firstAttribute="bottom" secondItem="1hh-8h-I2s" secondAttribute="bottom" id="B6e-Xq-QVg"/>
+                            <constraint firstItem="dpz-yQ-ceI" firstAttribute="trailing" secondItem="6bV-1e-PCq" secondAttribute="trailing" id="Q61-Qf-cbe"/>
                             <constraint firstItem="1hh-8h-I2s" firstAttribute="trailing" secondItem="6bV-1e-PCq" secondAttribute="trailing" id="QM8-5E-3DG"/>
-                            <constraint firstItem="oBj-2c-qyq" firstAttribute="leading" secondItem="6bV-1e-PCq" secondAttribute="leading" id="TU5-vq-Ja0"/>
-                            <constraint firstItem="dpz-yQ-ceI" firstAttribute="bottom" secondItem="6bV-1e-PCq" secondAttribute="bottom" id="aWA-5t-dJc"/>
+                            <constraint firstItem="dpz-yQ-ceI" firstAttribute="centerY" secondItem="6bV-1e-PCq" secondAttribute="centerY" id="Zln-6G-qBZ"/>
                             <constraint firstItem="1hh-8h-I2s" firstAttribute="leading" secondItem="6bV-1e-PCq" secondAttribute="leading" id="h3f-1J-JNP"/>
-                            <constraint firstItem="6bV-1e-PCq" firstAttribute="trailing" secondItem="oBj-2c-qyq" secondAttribute="trailing" id="hUx-hG-Va3"/>
-                            <constraint firstItem="dpz-yQ-ceI" firstAttribute="leading" secondItem="6bV-1e-PCq" secondAttribute="leading" id="kFk-a1-Ycj"/>
-                            <constraint firstItem="oBj-2c-qyq" firstAttribute="top" secondItem="6bV-1e-PCq" secondAttribute="top" id="sQW-Mu-aSw"/>
-                            <constraint firstItem="dpz-yQ-ceI" firstAttribute="trailing" secondItem="6bV-1e-PCq" secondAttribute="trailing" id="tYX-uN-tVn"/>
+                            <constraint firstItem="oBj-2c-qyq" firstAttribute="leading" secondItem="6bV-1e-PCq" secondAttribute="leading" id="jDj-Ie-T9K"/>
+                            <constraint firstItem="oBj-2c-qyq" firstAttribute="centerY" secondItem="6bV-1e-PCq" secondAttribute="centerY" id="qAx-3m-ee7"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="x0y-3Q-qsf"/>
                     <connections>
                         <outlet property="cameraPreviewContainer" destination="dpz-yQ-ceI" id="ohL-Da-7yL"/>
-                        <outlet property="heightContraintVideo" destination="1p5-tT-NXY" id="19m-fr-GV1"/>
+                        <outlet property="heightContraintCamera" destination="vFz-Ef-50k" id="tEB-cz-FFS"/>
+                        <outlet property="heightContraintVideo" destination="tUP-2X-QdE" id="4Vj-Qm-BGd"/>
                         <outlet property="togglePauseResumeButton" destination="2HO-Vp-gsB" id="w2E-Uw-kd5"/>
                         <outlet property="toggleRecordingButton" destination="OXT-yA-kM3" id="zi5-Vc-Sou"/>
                         <outlet property="videoView" destination="oBj-2c-qyq" id="1D8-kk-92I"/>

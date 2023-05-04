@@ -16,8 +16,7 @@ extension URL {
         DPVideoMerger().gridMergeVideos(
             withFileURLs: [urlVideo, self],
             videoResolution: cGSize,
-            completion: {
-                (_ mergedVideoFile: URL?, _ error: Error?) -> Void in
+            completion: { mergedVideoFile, error in
                 guard let mergedVideoFile = mergedVideoFile else {
                     return
                 }

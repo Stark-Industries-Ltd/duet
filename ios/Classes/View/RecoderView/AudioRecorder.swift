@@ -8,27 +8,24 @@
 import Foundation
 import AVFAudio
 
-class AudioRecorder: NSObject, AVAudioRecorderDelegate{
+class AudioRecorder: NSObject, AVAudioRecorderDelegate {
     
     
     let recordingSession = AVAudioSession.sharedInstance()
-    var audioRecorder : AVAudioRecorder?
-    var audioFilename : URL?
+    var audioRecorder: AVAudioRecorder?
+    var audioFilename: URL?
     
-    override init(){
+    override init() {
         super.init()
-        do{
+        do {
             try recordingSession.setCategory(.playAndRecord, mode: .default)
             try recordingSession.setActive(true)
-        }catch let error {
+        } catch let error {
             print("<< recordingSession \(error)")
         }
         self.audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
     }
-    
-    
-    
-    
+
     func startRecording() {
         let settings = [
             AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
@@ -50,12 +47,10 @@ class AudioRecorder: NSObject, AVAudioRecorderDelegate{
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return paths[0]
     }
-    
+
     func finishRecording(_ completion: @escaping((URL) -> Void)) {
         audioRecorder?.stop()
         audioRecorder = nil
         completion(audioFilename!)
     }
-    
-    
 }
