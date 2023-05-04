@@ -299,20 +299,19 @@ extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptu
         } else if writable,
                   output == audioDataOutput,
                   audioWriterInput.isReadyForMoreMediaData {
-            //Write audio buffer
-            //            print("<<<<<<  audioWriterInput.append(")
             audioWriterInput.append(sampleBuffer)
-        }else{
-            switch recorderState{
-                
+        } else {
+            switch recorderState {
             case .Stopped:
-                let i = 0
+//                let i = 0
                 //                 print("<<<<<<<< should not have got a call when player is stopped")
+                break
             case .Recording:
                 print("<<<<<<<< should be here when player is Recording")
             case .Paused:
-                let i = 0
+//                let i = 0
                 //                print("<<<<<<<< not writing when player is paused")
+                break
             case .NotReady:
                 print("<<<<<<<< should not have got a call when player is not ready")
             }

@@ -124,7 +124,7 @@ public class CameraEngine: NSObject {
 
     public func startCapture() {
         _captureQueue.sync {
-            if self.isCapturing {
+            if !self.isCapturing {
                 print("<<<<<<<<< Start capturing")
                 _encoder = nil
                 self.isPaused = false
@@ -137,7 +137,7 @@ public class CameraEngine: NSObject {
 
     public func stopCapturing(_ completion: @escaping((URL) -> Void)) {
         _captureQueue.sync {
-            if(self.isCapturing) {
+            if self.isCapturing {
                 print("<<<<<<<<< stop capturing")
                 _currentFile += 1
                 //serialize with audio and video capture

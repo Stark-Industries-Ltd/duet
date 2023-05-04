@@ -368,10 +368,10 @@ extension DPVideoMerger : VideoMerger {
             if let audioFileURL = audioFileURL {
                 addAudioToMergedVideo(audioFileURL, composition, isRepeatAudio, maxTime, completion)
             } else {
-//                videoFileURLs.forEach { (audioFileURL) in
-//                    addAudioToMergedVideo(audioFileURL, composition, isRepeatAudio, maxTime, completion)
-//                }
-                addAudioToMergedVideo(videoFileURLs.last, composition, isRepeatAudio, maxTime, completion)
+                videoFileURLs.forEach { (audioFileURL) in
+                    addAudioToMergedVideo(audioFileURL, composition, isRepeatAudio, maxTime, completion)
+                }
+//                addAudioToMergedVideo(videoFileURLs.last, composition, isRepeatAudio, maxTime, completion)
             }
         }
         instruction.layerInstructions = arrAVMutableVideoCompositionLayerInstruction.reversed()

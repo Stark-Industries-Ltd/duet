@@ -20,7 +20,8 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
     private var player: AVPlayer?
     var viewArgs: DuetViewArgs?
-    private var videoURL: URL?
+    private var videoUrl: URL?
+    private var cgSize: CGSize?
 
     // private ivars
     lazy var captureStack = CVRecorder(delegate: self)
@@ -39,21 +40,28 @@ class CameraViewController: UIViewController {
 
         //2. Create AVPlayer object
         var asset: AVAsset
-//        if let url = viewArgs?.url {
-//            asset = AVAsset(url: url)
-//            videoURL = url
-//        } else {
-            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
-                print("video.m4v not found")
-                return
-            }
-            asset = AVAsset(url: URL(fileURLWithPath: path))
-            videoURL = URL(fileURLWithPath: path)
-//        }
+        //        if let url = viewArgs?.url {
+        //            asset = AVAsset(url: url)
+        //            videoUrl = url
+        //        } else {
+        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+            print("video.m4v not found")
+            return
+        }
+        asset = AVAsset(url: URL(fileURLWithPath: path))
+        videoUrl = URL(fileURLWithPath: path)
+        //        }
         //2. Create AVPlayer object
         let videoSize = asset.videoSize
         let ratio = videoSize.height / videoSize.width
         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
+
+        // Register for notification
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(playerItemDidReachEnd),
+                                               name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+                                               object: nil) // Add observer
+
         let playerLayer = AVPlayerLayer(player: player)
         let width = UIScreen.main.bounds.width / 2
         let height = width * ratio
@@ -62,29 +70,33 @@ class CameraViewController: UIViewController {
         playerLayer.frame = CGRect(x: 0, y: 0,
                                    width: width,
                                    height: height)
+
+        let audioSession = AVAudioSession.sharedInstance()
+
+        //Executed right before playing avqueueplayer media
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .mixWithOthers])
+            try audioSession.setActive(true)
+        } catch {
+            fatalError("Error Setting Up Audio Session")
+        }
+
         self.videoView.layer.addSublayer(playerLayer)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        setup()
+        setupCaptureStack()
     }
 
-    private func saveInPhotoLibrary(with fileURL: URL) {
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: fileURL)
-        }) { saved, error in
-            if saved {
-                let alertController = UIAlertController(title: "Your video was successfully saved", message: nil, preferredStyle: .alert)
-                let defaultAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-                alertController.addAction(defaultAction)
-                DispatchQueue.main.async {
-                    self.present(alertController, animated: true, completion: nil)
-                }
-            } else {
-                print(error.debugDescription)
-            }
-        }
+    // Notification Handling
+    @objc func playerItemDidReachEnd(notification: NSNotification) {
+        player?.seek(to: CMTime.zero)
+        finishRecording()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -133,16 +145,12 @@ extension CameraViewController {
         updateToggleRecordingControl(currentRecorderState)
     }
 
-    private func setup(){
-        setupCaptureStack()
-    }
-
     private func setupCaptureStack() {
         let width = UIScreen.main.bounds.width
         let height = heightContraintCamera.constant
-        let cgSize = CGSize(width: width, height: height)
+        cgSize = CGSize(width: width, height: height)
         captureStack.loadCaptureStack(parentViewForPreview: cameraPreviewContainer,
-                                      videoUrl: videoURL,
+                                      videoUrl: videoUrl,
                                       cgSize: cgSize)
         print(cameraPreviewContainer.frame.width)
         print(cameraPreviewContainer.frame.height)
@@ -164,17 +172,25 @@ extension CameraViewController {
         }
     }
 
+    private func finishRecording() {
+        captureStack.recorderState = .Stopped
+        guard let videoUrl = videoUrl, let cgSize = cgSize else { return }
+        CameraEngine.shared.stopCapturing { url in
+            url.gridMergeVideos(urlVideo: videoUrl, cGSize: cgSize)
+        }
+    }
+
     @IBAction func toggleRecording() {
         captureStack.toggleRecording()
         switch captureStack.recorderState {
-            case .Stopped:
-                player?.pause()
-            case .Recording:
-                player?.play()
-            case .Paused:
-                player?.pause()
-            case .NotReady:
-                break
+        case .Stopped:
+            player?.pause()
+        case .Recording:
+            player?.play()
+        case .Paused:
+            player?.pause()
+        case .NotReady:
+            break
         }
     }
 

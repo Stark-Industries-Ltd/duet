@@ -18,8 +18,8 @@ public class CVRecorder {
     private weak var delegate: CVRecorderDelegate?
     private weak var parentViewForPreview: UIView?
     private var recoderView: CVRecorderView!
-    private var videoUrl: URL?
-    private var cgSize: CGSize?
+    var videoUrl: URL?
+    var cgSize: CGSize?
 
     var recorderState: RecorderState = .NotReady {
         didSet {
@@ -35,7 +35,7 @@ public class CVRecorder {
 extension CVRecorder {
     public func loadCaptureStack(parentViewForPreview: UIView,
                                  videoUrl: URL?,
-                                 cgSize: CGSize) {
+                                 cgSize: CGSize?) {
         self.parentViewForPreview = parentViewForPreview
         self.videoUrl = videoUrl
         self.cgSize = cgSize
