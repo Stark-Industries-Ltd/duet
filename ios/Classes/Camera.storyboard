@@ -46,70 +46,17 @@
                                     <constraint firstAttribute="height" constant="500" id="tUP-2X-QdE"/>
                                 </constraints>
                             </view>
-                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" translatesAutoresizingMaskIntoConstraints="NO" id="1hh-8h-I2s">
-                                <rect key="frame" x="0.0" y="1246" width="1024" height="100"/>
-                                <subviews>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tYI-1Q-J7X" userLabel="Pause Container">
-                                        <rect key="frame" x="0.0" y="0.0" width="512" height="100"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2HO-Vp-gsB">
-                                                <rect key="frame" x="218.5" y="25" width="75" height="50"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="height" constant="50" id="5Ya-lr-h43"/>
-                                                </constraints>
-                                                <state key="normal" title="Button"/>
-                                                <buttonConfiguration key="configuration" style="plain" title="Button"/>
-                                                <connections>
-                                                    <action selector="pausePressed" destination="usq-Z0-sp6" eventType="touchUpInside" id="Aeg-LQ-ju8"/>
-                                                </connections>
-                                            </button>
-                                        </subviews>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <constraints>
-                                            <constraint firstItem="2HO-Vp-gsB" firstAttribute="centerX" secondItem="tYI-1Q-J7X" secondAttribute="centerX" id="ReT-Gm-1Ag"/>
-                                            <constraint firstItem="2HO-Vp-gsB" firstAttribute="centerY" secondItem="tYI-1Q-J7X" secondAttribute="centerY" id="tlV-gs-oN9"/>
-                                        </constraints>
-                                    </view>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Hnu-T3-amL" userLabel="Start Stop Container">
-                                        <rect key="frame" x="512" y="0.0" width="512" height="100"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OXT-yA-kM3">
-                                                <rect key="frame" x="218.5" y="25" width="75" height="50"/>
-                                                <constraints>
-                                                    <constraint firstAttribute="height" constant="50" id="fQz-HH-OUb"/>
-                                                </constraints>
-                                                <state key="normal" title="Button"/>
-                                                <buttonConfiguration key="configuration" style="plain" title="Button"/>
-                                                <connections>
-                                                    <action selector="toggleRecording" destination="usq-Z0-sp6" eventType="touchUpInside" id="gkz-gu-xRm"/>
-                                                </connections>
-                                            </button>
-                                        </subviews>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                        <constraints>
-                                            <constraint firstItem="OXT-yA-kM3" firstAttribute="centerY" secondItem="Hnu-T3-amL" secondAttribute="centerY" id="PAr-f2-xoM"/>
-                                            <constraint firstItem="OXT-yA-kM3" firstAttribute="centerX" secondItem="Hnu-T3-amL" secondAttribute="centerX" id="XR4-yS-cz4"/>
-                                        </constraints>
-                                    </view>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="100" id="1Ou-4J-qS8"/>
-                                </constraints>
-                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6bV-1e-PCq"/>
                         <color key="backgroundColor" systemColor="labelColor"/>
                         <constraints>
+                            <constraint firstItem="37h-X5-c5Z" firstAttribute="centerX" secondItem="ocI-tb-bje" secondAttribute="centerX" id="78u-Ow-G3k"/>
                             <constraint firstItem="oBj-2c-qyq" firstAttribute="width" secondItem="ocI-tb-bje" secondAttribute="width" multiplier="1/2" id="8b2-Rj-RVt"/>
                             <constraint firstItem="dpz-yQ-ceI" firstAttribute="width" secondItem="ocI-tb-bje" secondAttribute="width" multiplier="1/2" id="B6D-JT-Hnl"/>
-                            <constraint firstItem="6bV-1e-PCq" firstAttribute="bottom" secondItem="1hh-8h-I2s" secondAttribute="bottom" id="B6e-Xq-QVg"/>
-                            <constraint firstItem="37h-X5-c5Z" firstAttribute="centerX" secondItem="1hh-8h-I2s" secondAttribute="centerX" id="E6O-Bl-gl3"/>
                             <constraint firstItem="37h-X5-c5Z" firstAttribute="centerY" secondItem="ocI-tb-bje" secondAttribute="centerY" id="Pjq-G0-LPC"/>
                             <constraint firstItem="dpz-yQ-ceI" firstAttribute="trailing" secondItem="6bV-1e-PCq" secondAttribute="trailing" id="Q61-Qf-cbe"/>
-                            <constraint firstItem="1hh-8h-I2s" firstAttribute="trailing" secondItem="6bV-1e-PCq" secondAttribute="trailing" id="QM8-5E-3DG"/>
                             <constraint firstItem="dpz-yQ-ceI" firstAttribute="centerY" secondItem="6bV-1e-PCq" secondAttribute="centerY" id="Zln-6G-qBZ"/>
                             <constraint firstItem="37h-X5-c5Z" firstAttribute="width" secondItem="ocI-tb-bje" secondAttribute="width" multiplier="1.03906" id="fix-sR-kpm"/>
-                            <constraint firstItem="1hh-8h-I2s" firstAttribute="leading" secondItem="6bV-1e-PCq" secondAttribute="leading" id="h3f-1J-JNP"/>
                             <constraint firstItem="oBj-2c-qyq" firstAttribute="leading" secondItem="6bV-1e-PCq" secondAttribute="leading" id="jDj-Ie-T9K"/>
                             <constraint firstItem="oBj-2c-qyq" firstAttribute="centerY" secondItem="6bV-1e-PCq" secondAttribute="centerY" id="qAx-3m-ee7"/>
                             <constraint firstItem="37h-X5-c5Z" firstAttribute="height" secondItem="ocI-tb-bje" secondAttribute="height" multiplier="1.02928" id="qrv-rI-jx4"/>
@@ -120,8 +67,6 @@
                         <outlet property="cameraPreviewContainer" destination="dpz-yQ-ceI" id="ohL-Da-7yL"/>
                         <outlet property="heightContraintCamera" destination="vFz-Ef-50k" id="tEB-cz-FFS"/>
                         <outlet property="heightContraintVideo" destination="tUP-2X-QdE" id="4Vj-Qm-BGd"/>
-                        <outlet property="togglePauseResumeButton" destination="2HO-Vp-gsB" id="w2E-Uw-kd5"/>
-                        <outlet property="toggleRecordingButton" destination="OXT-yA-kM3" id="zi5-Vc-Sou"/>
                         <outlet property="videoView" destination="oBj-2c-qyq" id="1D8-kk-92I"/>
                     </connections>
                 </viewController>

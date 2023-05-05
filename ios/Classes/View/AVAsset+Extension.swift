@@ -20,4 +20,8 @@ extension AVAsset {
         }
         return CGSize(width: 0, height: 0)
     }
+
+    var ratio: CGFloat {
+        return self.videoSize.height / self.videoSize.width
+    }
 }

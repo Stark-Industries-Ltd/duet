@@ -19,7 +19,6 @@ class CameraViewController: UIViewController {
     private var player: AVPlayer?
     var viewArgs: DuetViewArgs?
     private var videoUrl: URL?
-    private var cgSize: CGSize?
 
     private lazy var captureStack = CVRecorder(delegate: self)
     private var isObjectDetectionEnabled = false
@@ -33,20 +32,17 @@ class CameraViewController: UIViewController {
 
         //2. Create AVPlayer object
         var asset: AVAsset
-        //        if let url = viewArgs?.url {
-        //            asset = AVAsset(url: url)
-        //            videoUrl = url
-        //        } else {
-        guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
-            print("video.m4v not found")
-            return
+        if let url = viewArgs?.url {
+            asset = AVAsset(url: url)
+            videoUrl = url
+        } else {
+            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
+                print("video.m4v not found")
+                return
+            }
+            asset = AVAsset(url: URL(fileURLWithPath: path))
+            videoUrl = URL(fileURLWithPath: path)
         }
-        asset = AVAsset(url: URL(fileURLWithPath: path))
-        videoUrl = URL(fileURLWithPath: path)
-        //        }
-        //2. Create AVPlayer object
-        let videoSize = asset.videoSize
-        let ratio = videoSize.height / videoSize.width
         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
 
         // Register for notification
@@ -57,7 +53,7 @@ class CameraViewController: UIViewController {
 
         let playerLayer = AVPlayerLayer(player: player)
         let width = UIScreen.main.bounds.width / 2
-        let height = width * ratio
+        let height = width * asset.ratio
         heightContraintCamera.constant = height
         heightContraintVideo.constant = height
         playerLayer.frame = CGRect(x: 0, y: 0,
@@ -65,10 +61,9 @@ class CameraViewController: UIViewController {
                                    height: height)
 
         let audioSession = AVAudioSession.sharedInstance()
-
         //Executed right before playing avqueueplayer media
         do {
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .mixWithOthers])
+            try audioSession.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .duckOthers, .defaultToSpeaker])
             try audioSession.setActive(true)
         } catch {
             fatalError("Error Setting Up Audio Session")
@@ -96,14 +91,7 @@ class CameraViewController: UIViewController {
 extension CameraViewController {
 
     private func setupCaptureStack() {
-        let width = UIScreen.main.bounds.width
-        let height = heightContraintCamera.constant
-        cgSize = CGSize(width: width, height: height)
-        captureStack.loadCaptureStack(parentViewForPreview: cameraPreviewContainer,
-                                      videoUrl: videoUrl,
-                                      cgSize: cgSize)
-        print(cameraPreviewContainer.frame.width)
-        print(cameraPreviewContainer.frame.height)
+        captureStack.loadCaptureStack(parentViewForPreview: cameraPreviewContainer)
     }
 }
 
@@ -136,10 +124,22 @@ extension CameraViewController {
 
     private func finishRecording() {
         captureStack.recorderState = .Stopped
-        guard let videoUrl = videoUrl, let cgSize = cgSize else { return }
-        CameraEngine.shared.stopCapturing { url in
-            url.gridMergeVideos(urlVideo: videoUrl, cGSize: cgSize)
+        CameraEngine.shared.stopCapturing { [weak self] cameraRecordUrl in
+            SwiftDuetPlugin.notifyFlutter(event: .VIDEO_RECORDED, arguments: cameraRecordUrl.path)
+            guard let self = self else {
+                return
+            }
+            self.mergeVideos(cameraRecordUrl: cameraRecordUrl)
         }
+    }
+
+    private func mergeVideos(cameraRecordUrl: URL) {
+        let width = UIScreen.main.bounds.width
+        let height = heightContraintCamera.constant
+        guard let videoUrl = videoUrl else { return }
+        cameraRecordUrl.gridMergeVideos(urlVideo: videoUrl,
+                                        cGSize: CGSize(width: width, height: height)
+        )
     }
 }
 
