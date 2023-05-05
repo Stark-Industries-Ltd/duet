@@ -32,7 +32,7 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
     fileprivate var videoWriterInput: AVAssetWriterInput!
     fileprivate var audioWriterInput: AVAssetWriterInput!
     fileprivate var sessionAtSourceTime: CMTime?
-    
+
     var lastTimestamp = CMTime()
     public weak var delegate: VideoCaptureDelegate?
     public var fps = 15
@@ -81,7 +81,7 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
             }
 
             //Now we should define your output data
-            let queue = DispatchQueue(label: "com.cvcamrecorder.record-video.data-output")
+            let queue = DispatchQueue(label: "CameraEngine.record-video")
 
             videoDataOutput.alwaysDiscardsLateVideoFrames = true
             if cameraSession.canAddOutput(videoDataOutput) {
@@ -122,8 +122,7 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
     func setupWriter() {
         do {
             _filename = UUID().uuidString
-            let userDomainMask = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-            let videoPath = userDomainMask.first!.appendingPathComponent("\(_filename).mp4")
+            let videoPath = URL.documents.appendingPathComponent("\(_filename).mp4")
             videoWriter = try AVAssetWriter(url: videoPath, fileType: AVFileType.mp4)
             
             //Add video input
@@ -176,7 +175,7 @@ extension CVRecorderView {
     
 }
 
-extension CVRecorderView{
+extension CVRecorderView {
     func toggleRecording() {
         switch recorderState {
         case .Stopped:

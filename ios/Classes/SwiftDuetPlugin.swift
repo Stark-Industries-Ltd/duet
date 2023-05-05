@@ -21,12 +21,12 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
       
       switch(call.method){
       case "RECORD":
-          FLNativeView.controller?.toggleRecording()
+          FLNativeView.controller?.startRecording()
           result("Status")
-//          result(FLNativeView.controller?.captureStack.recorderState)
           break
       case "RESET":
           result("RESET result from native")
+          FLNativeView.controller?.resetRecoding()
           break
       default:
         result("iOS " + UIDevice.current.systemVersion)

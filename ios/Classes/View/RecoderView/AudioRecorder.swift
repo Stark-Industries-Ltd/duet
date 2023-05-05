@@ -9,12 +9,11 @@ import Foundation
 import AVFAudio
 
 class AudioRecorder: NSObject, AVAudioRecorderDelegate {
-    
-    
+
     let recordingSession = AVAudioSession.sharedInstance()
     var audioRecorder: AVAudioRecorder?
     var audioFilename: URL?
-    
+
     override init() {
         super.init()
         do {
@@ -23,7 +22,7 @@ class AudioRecorder: NSObject, AVAudioRecorderDelegate {
         } catch let error {
             print("<< recordingSession \(error)")
         }
-        self.audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
+        self.audioFilename = URL.documents.appendingPathComponent("recording.m4a")
     }
 
     func startRecording() {
@@ -42,15 +41,12 @@ class AudioRecorder: NSObject, AVAudioRecorderDelegate {
             print("AUDIO RECORDER <<<<< \(error)")
         }
     }
-    
-    func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
-    }
 
     func finishRecording(_ completion: @escaping((URL) -> Void)) {
         audioRecorder?.stop()
         audioRecorder = nil
-        completion(audioFilename!)
+        if let audioFilename = audioFilename {
+            completion(audioFilename)
+        }
     }
 }

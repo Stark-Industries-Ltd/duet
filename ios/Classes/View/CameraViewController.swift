@@ -14,8 +14,6 @@ class CameraViewController: UIViewController {
     //IBOutlets
     @IBOutlet weak var videoView: UIView!
     @IBOutlet weak var cameraPreviewContainer: UIView!
-    @IBOutlet private weak var togglePauseResumeButton : UIButton?
-    @IBOutlet private weak var toggleRecordingButton : UIButton?
     @IBOutlet weak var heightContraintCamera: NSLayoutConstraint!
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
     private var player: AVPlayer?
@@ -23,13 +21,8 @@ class CameraViewController: UIViewController {
     private var videoUrl: URL?
     private var cgSize: CGSize?
 
-    // private ivars
-    lazy var captureStack = CVRecorder(delegate: self)
+    private lazy var captureStack = CVRecorder(delegate: self)
     private var isObjectDetectionEnabled = false
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -102,49 +95,6 @@ class CameraViewController: UIViewController {
 
 extension CameraViewController {
 
-    private func updatePauseResumeControl(_ currentRecorderState: RecorderState) {
-        switch currentRecorderState {
-        case .Paused:
-            togglePauseResumeButton?.isUserInteractionEnabled = true
-            togglePauseResumeButton?.backgroundColor = .green
-            togglePauseResumeButton?.setTitle("Resume", for: .normal)
-        case .Recording:
-            togglePauseResumeButton?.isUserInteractionEnabled = true
-            togglePauseResumeButton?.backgroundColor = .green
-            togglePauseResumeButton?.setTitle("Pause", for: .normal)
-        case .Stopped:
-            fallthrough
-        case .NotReady:
-            togglePauseResumeButton?.isUserInteractionEnabled = false
-            togglePauseResumeButton?.backgroundColor = .gray
-            togglePauseResumeButton?.setTitle("Pause", for: .normal)
-        }
-    }
-
-    private func updateToggleRecordingControl(_ currentRecorderState: RecorderState) {
-        switch currentRecorderState {
-        case .Paused:
-            fallthrough
-        case .Recording:
-            toggleRecordingButton?.isUserInteractionEnabled = true
-            toggleRecordingButton?.backgroundColor = .green
-            toggleRecordingButton?.setTitle("Stop", for: .normal)
-        case .Stopped:
-            toggleRecordingButton?.isUserInteractionEnabled = true
-            toggleRecordingButton?.backgroundColor = .green
-            toggleRecordingButton?.setTitle("Start", for: .normal)
-        case .NotReady:
-            toggleRecordingButton?.isUserInteractionEnabled = false
-            toggleRecordingButton?.backgroundColor = .gray
-            toggleRecordingButton?.setTitle("Not Ready", for: .normal)
-        }
-    }
-
-    private func changeControlStates(_ currentRecorderState: RecorderState) {
-        updatePauseResumeControl(currentRecorderState)
-        updateToggleRecordingControl(currentRecorderState)
-    }
-
     private func setupCaptureStack() {
         let width = UIScreen.main.bounds.width
         let height = heightContraintCamera.constant
@@ -158,18 +108,30 @@ extension CameraViewController {
 }
 
 extension CameraViewController {
-    @IBAction func pausePressed() {
-        captureStack.togglePauseResumeRecording()
-        switch captureStack.recorderState {
-        case .Stopped:
-            player?.pause()
-        case .Recording:
-            player?.play()
-        case .Paused:
-            player?.pause()
-        case .NotReady:
-            break
-        }
+
+    func startRecording() {
+        captureStack.recorderState = .Recording
+        CameraEngine.shared.startCapture()
+        player?.play()
+    }
+
+    func pauseRecording() {
+        captureStack.recorderState = .Paused
+        CameraEngine.shared.pauseCapture()
+        player?.pause()
+    }
+
+    func resumeRecording() {
+        captureStack.recorderState = .Recording
+        CameraEngine.shared.resumeCapture()
+        player?.play()
+    }
+
+    func resetRecoding() {
+        captureStack.recorderState = .Stopped
+        CameraEngine.shared.resetCapture()
+        player?.pause()
+        player?.seek(to: CMTime.zero)
     }
 
     private func finishRecording() {
@@ -179,21 +141,6 @@ extension CameraViewController {
             url.gridMergeVideos(urlVideo: videoUrl, cGSize: cgSize)
         }
     }
-
-    @IBAction func toggleRecording() {
-        captureStack.toggleRecording()
-        switch captureStack.recorderState {
-        case .Stopped:
-            player?.pause()
-        case .Recording:
-            player?.play()
-        case .Paused:
-            player?.pause()
-        case .NotReady:
-            break
-        }
-    }
-
 }
 
 extension CameraViewController: CVRecorderDelegate {
@@ -212,6 +159,5 @@ extension CameraViewController: CVRecorderDelegate {
 
     func didChangedRecorderState(_ currentRecorderState:  RecorderState) {
         print("<<<<<< changed state -- \(currentRecorderState)")
-        changeControlStates(currentRecorderState)
     }
 }
