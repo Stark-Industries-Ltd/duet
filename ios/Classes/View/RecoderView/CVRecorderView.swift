@@ -62,7 +62,7 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
         cameraDevice = cameraWithPosition(position: devicePosition)
 
         //Setup your microphone
-        let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)
+        let audioDevice = AVCaptureDevice.default( .builtInMicrophone, for: .audio, position: .front)
 
         do {
             cameraSession.beginConfiguration()

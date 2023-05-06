@@ -40,12 +40,15 @@ class VideoEncoder {
                 _writer.add(_videoInput)
             }
             // add audio
-            _audioInput = AVAssetWriterInput(mediaType: AVMediaType.audio, outputSettings: [
-                AVFormatIDKey: kAudioFormatMPEG4AAC,
-                AVNumberOfChannelsKey: 1,
-                AVSampleRateKey: 44100,
-                AVEncoderBitRateKey: 64000,
-            ])
+            _audioInput = AVAssetWriterInput(
+                mediaType: AVMediaType.audio,
+                outputSettings: [
+                    AVFormatIDKey: kAudioFormatMPEG4AAC,
+                    AVNumberOfChannelsKey: 1,
+                    AVSampleRateKey: 44100,
+                    AVEncoderBitRateKey: 64000,
+                ]
+            )
             _audioInput.expectsMediaDataInRealTime = true
             if _writer.canAdd(_audioInput) {
                 _writer.add(_audioInput)
