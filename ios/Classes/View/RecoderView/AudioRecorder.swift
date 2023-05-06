@@ -19,18 +19,19 @@ class AudioRecorder: NSObject, AVAudioRecorderDelegate {
         self.audioFilename = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("recording.aac")
 
         AudioRecorder.setAudio()
-        setAudioEngine()
+        if #available(iOS 13.0, *) {
+            setAudioEngine()
+        }
     }
 
+    @available(iOS 13.0, *)
     func setAudioEngine(){
         do {
-            if #available(iOS 13.0, *) {
-                let audioInput = audioEngine.inputNode
-                audioInput.isVoiceProcessingBypassed = true
-                try audioInput.setVoiceProcessingEnabled(true)
-                let audioFormat = audioEngine.inputNode.outputFormat(forBus: 0)
-                audioEngine.connect(audioInput, to: audioEngine.mainMixerNode, format:audioFormat)
-            }
+            let audioInput = audioEngine.inputNode
+            audioInput.isVoiceProcessingBypassed = true
+            try audioInput.setVoiceProcessingEnabled(true)
+            let audioFormat = audioEngine.inputNode.outputFormat(forBus: 0)
+            audioEngine.connect(audioInput, to: audioEngine.mainMixerNode, format:audioFormat)
         } catch {
             print("Could not enable voice processing \(error)")
             return
@@ -39,11 +40,9 @@ class AudioRecorder: NSObject, AVAudioRecorderDelegate {
 
     static func setAudio(){
         do {
-            if #available(iOS 12.0, *) {
-                let session = AVAudioSession.sharedInstance()
-                try session.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
-                try session.setActive(true)
-            }
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
+            try session.setActive(true)
         } catch let error {
             print("<< session \(error)")
         }
