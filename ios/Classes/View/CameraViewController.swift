@@ -60,14 +60,8 @@ class CameraViewController: UIViewController {
                                    width: width,
                                    height: height)
 
-        let audioSession = AVAudioSession.sharedInstance()
-        //Executed right before playing avqueueplayer media
-        do {
-            try audioSession.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .duckOthers, .defaultToSpeaker])
-            try audioSession.setActive(true)
-        } catch {
-            fatalError("Error Setting Up Audio Session")
-        }
+        // Executed right before playing avqueueplayer media
+        AudioRecorder.setAudio()
 
         self.videoView.layer.addSublayer(playerLayer)
     }
