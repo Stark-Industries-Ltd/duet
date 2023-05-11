@@ -7,11 +7,13 @@ class Duet {
     OnVideoRecorded? onVideoRecorded,
     OnAudioReceived? onAudioReceived,
     OnVideoMerged? onVideoMerged,
+    OnTimerVideoReceived? onTimerVideoReceived,
   }) async {
     return DuetPlatform.instance.onNativeCall(
       onAudioReceived: onAudioReceived,
       onVideoMerged: onVideoMerged,
       onVideoRecorded: onVideoRecorded,
+      onTimerVideoReceived: onTimerVideoReceived,
     );
   }
 
@@ -22,4 +24,8 @@ class Duet {
   Future<String?> pauseDuet() => DuetPlatform.instance.pauseDuet();
 
   Future<String?> resetDuet() => DuetPlatform.instance.resetDuet();
+
+  Future<String?> recordAudio() => DuetPlatform.instance.recordAudio();
+
+  Future<String?> pauseAudio() => DuetPlatform.instance.pauseAudio();
 }

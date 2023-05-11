@@ -6,6 +6,7 @@ import 'duet_platform_interface.dart';
 typedef OnVideoRecorded = Function(String path);
 typedef OnVideoMerged = Function(String path);
 typedef OnAudioReceived = Function(String path);
+typedef OnTimerVideoReceived = Function(String timer);
 
 /// An implementation of [DuetPlatform] that uses method channels.
 class MethodChannelDuet extends DuetPlatform {
@@ -18,6 +19,7 @@ class MethodChannelDuet extends DuetPlatform {
     OnVideoRecorded? onVideoRecorded,
     OnAudioReceived? onAudioReceived,
     OnVideoMerged? onVideoMerged,
+    OnTimerVideoReceived? onTimerVideoReceived,
   }) async {
     methodChannel.setMethodCallHandler((call) {
       switch (call.method) {
@@ -27,6 +29,8 @@ class MethodChannelDuet extends DuetPlatform {
           return onAudioReceived?.call(call.arguments);
         case DuetConst.videoMerged:
           return onVideoMerged?.call(call.arguments);
+        case DuetConst.videoTimer:
+          return onTimerVideoReceived?.call(call.arguments);
         default:
           return Future(() => null);
       }
@@ -35,37 +39,52 @@ class MethodChannelDuet extends DuetPlatform {
 
   @override
   Future<String?> recordDuet() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.record);
+    final result = methodChannel.invokeMethod<String>(DuetConst.recordDuet);
     return result;
   }
 
   @override
   Future<String?> pauseDuet() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.pause);
+    final result = methodChannel.invokeMethod<String>(DuetConst.pauseDuet);
     return result;
   }
 
   @override
   Future<String?> resumeDuet() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.resume);
+    final result = methodChannel.invokeMethod<String>(DuetConst.resumeDuet);
     return result;
   }
 
   @override
   Future<String?> resetDuet() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.reset);
+    final result = methodChannel.invokeMethod<String>(DuetConst.resetDuet);
+    return result;
+  }
+
+  @override
+  Future<String?> pauseAudio() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.pauseAudio);
+    return result;
+  }
+
+  @override
+  Future<String?> recordAudio() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.recordAudio);
     return result;
   }
 }
 
 class DuetConst {
-  static const String record = 'RECORD';
-  static const String pause = 'PAUSE';
-  static const String resume = 'RESUME';
-  static const String reset = 'RESET';
+  static const String recordDuet = 'RECORD_DUET';
+  static const String pauseDuet = 'PAUSE_DUET';
+  static const String resumeDuet = 'RESUME_DUET';
+  static const String resetDuet = 'RESET_DUET';
+  static const String recordAudio = 'RECORD_AUDIO';
+  static const String pauseAudio = 'PAUSE_AUDIO';
 
   // Native call
   static const String audioResult = 'AUDIO_RESULT';
   static const String videoRecorded = 'VIDEO_RECORDED';
   static const String videoMerged = 'VIDEO_MERGED';
+  static const String videoTimer = 'VIDEO_TIMER';
 }

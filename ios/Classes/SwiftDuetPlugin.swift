@@ -1,6 +1,15 @@
 import Flutter
 import UIKit
 
+enum DuetType: String {
+    case recordDuet  = "RECORD_DUET"
+    case pauseDuet   = "PAUSE_DUET"
+    case resumeDuet  = "RESUME_DUET"
+    case resetDuet   = "RESET_DUET"
+    case recordAudio = "RECORD_AUDIO"
+    case pauseAudio  = "PAUSE_AUDIO"
+}
+
 @available(iOS 10.0, *)
 public class SwiftDuetPlugin: NSObject, FlutterPlugin {
     static var channel: FlutterMethodChannel?
@@ -21,22 +30,24 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
         print(call.method)
 
         switch(call.method){
-        case "RECORD":
+        case DuetType.recordDuet.rawValue:
             FLNativeView.controller?.startRecording()
             result("RECORD result from native")
-            break
-        case "PAUSE":
+        case DuetType.pauseDuet.rawValue:
             FLNativeView.controller?.pauseRecording()
             result("RECORD result from native")
-            break
-        case "RESUME":
+        case DuetType.resumeDuet.rawValue:
             FLNativeView.controller?.resumeRecording()
             result("RECORD result from native")
-            break
-        case "RESET":
+        case DuetType.resetDuet.rawValue:
             result("RESET result from native")
             FLNativeView.controller?.resetRecoding()
-            break
+        case DuetType.recordAudio.rawValue:
+            result("Record Audio result from native")
+            FLNativeView.controller?.startRecordingAudio()
+        case DuetType.pauseAudio.rawValue:
+            result("Pause Audio from native")
+            FLNativeView.controller?.pauseRecordingAudio()
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
@@ -51,4 +62,5 @@ public enum EventType: String {
     case AUDIO_RESULT
     case VIDEO_RECORDED
     case VIDEO_MERGED
+    case VIDEO_TIMER
 }

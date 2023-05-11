@@ -61,14 +61,7 @@ class VideoEncoder {
 
     func finishwithCompletionHandler(_ completion: @escaping((URL) -> Void)) {
         _writer.finishWriting {
-            let url = self._writer.outputURL
-            completion(url)
-            self._audioRecorder.finishRecording { url in
-                print("AUDIO URL <<< \(url)" )
-                if let vc = FLNativeView.controller {
-                    url.presentShareActivity(viewController: vc)
-                }
-            }
+            completion(self._writer.outputURL)
         }
     }
 
@@ -77,7 +70,6 @@ class VideoEncoder {
             let startTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             _writer.startWriting()
             _writer.startSession(atSourceTime: startTime)
-            _audioRecorder.startRecording()
         }
 
         if (_writer.status == .failed) {

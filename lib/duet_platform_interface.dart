@@ -27,6 +27,7 @@ abstract class DuetPlatform extends PlatformInterface {
     OnVideoRecorded? onVideoRecorded,
     OnAudioReceived? onAudioReceived,
     OnVideoMerged? onVideoMerged,
+    OnTimerVideoReceived? onTimerVideoReceived,
   });
 
   Future<String?> recordDuet();
@@ -36,4 +37,8 @@ abstract class DuetPlatform extends PlatformInterface {
   Future<String?> resumeDuet();
 
   Future<String?> resetDuet();
+
+  Future<String?> recordAudio();
+
+  Future<String?> pauseAudio();
 }

@@ -172,7 +172,6 @@ extension CVRecorderView {
         }
         return nil
     }
-    
 }
 
 
@@ -184,14 +183,8 @@ extension CVRecorderView {
     }
 }
 
-extension CMTime {
-    var isValid: Bool { return flags.contains(.valid) }
-}
-
 extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
-    
-    
-    
+
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         guard CMSampleBufferDataIsReady(sampleBuffer) else { return }
 
@@ -208,7 +201,6 @@ extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptu
 
             if videoWriterInput.isReadyForMoreMediaData {
                 //Write video buffer
-                print("<<<<<<  videoWriterInput.append --- \(recorderState)")
                 videoWriterInput.append(sampleBuffer)
                 let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
                 let deltaTime = timestamp - lastTimestamp

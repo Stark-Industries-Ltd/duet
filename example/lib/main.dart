@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:duet/duet.dart';
@@ -25,10 +26,28 @@ class CameraView extends StatefulWidget {
   State<CameraView> createState() => _CameraViewState();
 }
 
+class DuetScrip {
+  final int time;
+  final int duration;
+
+  DuetScrip({
+    required this.time,
+    required this.duration,
+  });
+}
+
 class _CameraViewState extends State<CameraView> {
   final url =
       'https://dphw5vqyyotoi.cloudfront.net/upload/5c209fe6176b0/2023/05/05/dd92_manhdz.mp4';
   final _duetPlugin = Duet();
+  int time = 0;
+
+  final listDuetScrip = [
+    DuetScrip(time: 9, duration: 2),
+    DuetScrip(time: 13, duration: 2),
+    DuetScrip(time: 18, duration: 2),
+    DuetScrip(time: 23, duration: 2),
+  ];
 
   @override
   void initState() {
@@ -46,7 +65,25 @@ class _CameraViewState extends State<CameraView> {
           ),
         );
       },
+      onTimerVideoReceived: _handleVideoTime,
     );
+  }
+
+  Timer? _timer;
+
+  _handleVideoTime(timer) {
+    final videoTime = double.tryParse(timer);
+    if (videoTime != null && time != videoTime.round()) {
+      time = videoTime.round();
+      // listDuetScrip
+      final duetScrip = listDuetScrip.firstWhere((e) => e.time == time);
+      _duetPlugin.pauseDuet();
+      _timer?.cancel();
+      _timer = Timer(Duration(seconds: duetScrip.duration), () {
+        _duetPlugin.pauseAudio();
+        _timer?.cancel();
+      });
+    }
   }
 
   void printHau(String? url) {
@@ -81,12 +118,11 @@ class _CameraViewState extends State<CameraView> {
             child: const Text('Reset'),
           ),
           ElevatedButton(
-            onPressed: () => _duetPlugin.pauseDuet(),
-            child: const Text('Pause'),
-          ),
-          ElevatedButton(
-            onPressed: () => _duetPlugin.resumeDuet(),
-            child: const Text('Resume'),
+            onPressed: () {
+              _duetPlugin.resumeDuet();
+              _duetPlugin.recordAudio();
+            },
+            child: const Text('Record Audio'),
           ),
         ],
       ),
