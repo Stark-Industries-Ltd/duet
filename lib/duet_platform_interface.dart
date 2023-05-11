@@ -31,5 +31,9 @@ abstract class DuetPlatform extends PlatformInterface {
 
   Future<String?> recordDuet();
 
+  Future<String?> pauseDuet();
+
+  Future<String?> resumeDuet();
+
   Future<String?> resetDuet();
 }

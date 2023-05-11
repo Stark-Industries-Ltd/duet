@@ -20,7 +20,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="37h-X5-c5Z">
                                 <rect key="frame" x="-20" y="-20" width="1064" height="1406"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_background.png" translatesAutoresizingMaskIntoConstraints="NO" id="LIG-ls-N2k">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="LIG-ls-N2k">
                                         <rect key="frame" x="20" y="20" width="1024" height="1366"/>
                                     </imageView>
                                 </subviews>
@@ -67,6 +67,7 @@
                         <outlet property="cameraPreviewContainer" destination="dpz-yQ-ceI" id="ohL-Da-7yL"/>
                         <outlet property="heightContraintCamera" destination="vFz-Ef-50k" id="tEB-cz-FFS"/>
                         <outlet property="heightContraintVideo" destination="tUP-2X-QdE" id="4Vj-Qm-BGd"/>
+                        <outlet property="imageBackground" destination="LIG-ls-N2k" id="wwq-d8-Dve"/>
                         <outlet property="videoView" destination="oBj-2c-qyq" id="1D8-kk-92I"/>
                     </connections>
                 </viewController>
@@ -76,7 +77,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="ic_background.png" width="1620" height="2160"/>
         <systemColor name="labelColor">
             <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>

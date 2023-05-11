@@ -81,8 +81,12 @@ class _CameraViewState extends State<CameraView> {
             child: const Text('Reset'),
           ),
           ElevatedButton(
-            onPressed: () {},
-            child: const Text('Reset'),
+            onPressed: () => _duetPlugin.pauseDuet(),
+            child: const Text('Pause'),
+          ),
+          ElevatedButton(
+            onPressed: () => _duetPlugin.resumeDuet(),
+            child: const Text('Resume'),
           ),
         ],
       ),
@@ -126,7 +130,6 @@ class _PlayVideosScreenState extends State<PlayVideosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Stack(
         children: [

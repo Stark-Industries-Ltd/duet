@@ -34,12 +34,14 @@ class DuetView extends StatelessWidget {
 
 class DuetViewArgs {
   final String? url;
+  final String? image;
 
-  const DuetViewArgs({this.url});
+  const DuetViewArgs({this.url, this.image});
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'url': url,
+      'image': image,
     };
   }
 }

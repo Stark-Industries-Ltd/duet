@@ -32,7 +32,7 @@ public class CVRecorder {
 extension CVRecorder {
     public func loadCaptureStack(parentViewForPreview: UIView) {
         self.parentViewForPreview = parentViewForPreview
-        CameraEngine.shared.startup(parentViewForPreview, devicePosition: .front)
+        CameraEngine.shared.startup(parentViewForPreview)
         recorderState = .Stopped
     }
 }

@@ -62,7 +62,6 @@ class VideoEncoder {
     func finishwithCompletionHandler(_ completion: @escaping((URL) -> Void)) {
         _writer.finishWriting {
             let url = self._writer.outputURL
-            self.saveVideoToAlbum(videoUrl: url)
             completion(url)
             self._audioRecorder.finishRecording { url in
                 print("AUDIO URL <<< \(url)" )
@@ -104,20 +103,4 @@ class VideoEncoder {
         debugPrint("_encoder deinitialized")
     }
 
-}
-
-extension VideoEncoder {
-    private func saveVideoToAlbum(videoUrl: URL) {
-        var info = ""
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl)
-        }) { (success, error) in
-            if success {
-                info = "success"
-            } else {
-                info = "Error = \(error.debugDescription)"
-            }
-            print(info)
-        }
-    }
 }

@@ -36,7 +36,7 @@ public class CameraEngine: NSObject {
     var channels: Int!
     var sampleRate: Float64!
 
-    public func startup(_ parentView: UIView,  devicePosition: AVCaptureDevice.Position) {
+    public func startup(_ parentView: UIView) {
         guard session == nil else {
             return
         }
@@ -50,7 +50,7 @@ public class CameraEngine: NSObject {
         //create capture device with video
         session = AVCaptureSession()
         session.sessionPreset = .photo
-        let cameraDevice = cameraWithPosition(position: devicePosition)
+        let cameraDevice = cameraWithPosition(position: .front)
         //Setup your microphone
         let audioDevice = AVCaptureDevice.default(for: AVMediaType.audio)
 

@@ -20,7 +20,7 @@ extension URL {
                 guard let mergedVideoFile = mergedVideoFile else {
                     return
                 }
-                mergedVideoFile.saveVideoToAlbum()
+                SwiftDuetPlugin.notifyFlutter(event: .VIDEO_MERGED, arguments: mergedVideoFile.path)
             }
         )
     }

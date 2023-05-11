@@ -57,13 +57,14 @@ class FLNativeView: NSObject, FlutterPlatformView {
     }
 }
 
-
 struct DuetViewArgs {
 
-    var url : URL?
+    var urlVideo: URL?
+    var image: String?
 
-    init(data:[String:Any]) {
+    init(data: [String: Any]) {
         let _url = (data["url"] as? String) ?? ""
-        self.url = _url.starts(with: "http") ? URL(string: _url) : URL(fileURLWithPath: _url)
+        self.urlVideo = _url.starts(with: "http") ? URL(string: _url) : URL(fileURLWithPath: _url)
+        self.image = (data["image"] as? String) ?? ""
     }
 }

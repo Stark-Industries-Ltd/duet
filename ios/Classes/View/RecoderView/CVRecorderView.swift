@@ -175,43 +175,6 @@ extension CVRecorderView {
     
 }
 
-extension CVRecorderView {
-    func toggleRecording() {
-        switch recorderState {
-        case .Stopped:
-            print("start recording")
-            encoder = nil
-            _timeOffset = CMTime(value: 0, timescale: 0)
-            _discont = false
-            recorderState = .Recording
-            setupWriter()
-        case .Recording:
-            fallthrough
-        case .Paused:
-            print("stop recording")
-            self.stop()
-            recorderState = .Stopped
-        case .NotReady:
-            print("error should not have received toggle pause command when NotReady")
-        }
-    }
-
-    func togglePauseRecording() {
-        switch recorderState{
-        case .Stopped:
-            print("error should not have received toggle pause command when stopped")
-        case .Recording:
-            print("pause recording")
-            recorderState = .Paused
-            _discont = true
-        case .Paused:
-            print("resume recording")
-            recorderState = .Recording
-        case .NotReady:
-            print("error should not have received toggle pause command when NotReady")
-        }
-    }
-}
 
 extension CVRecorderView {
     fileprivate func canWrite() -> Bool {
@@ -221,54 +184,16 @@ extension CVRecorderView {
     }
 }
 
-extension CVRecorderView {
-    func stop() {
-        if recorderState == .Recording || recorderState == .Paused{
-            videoWriter.finishWriting { [weak self] in
-                self?.sessionAtSourceTime = nil
-                guard let url = self?.videoWriter.outputURL else { return }
-                self?.saveVideoToAlbum(videoUrl: url)
-            }
-        }else{
-            print("<<<<<<<<<<< stop() should not be called wen recorder state is \(recorderState)")
-        }
-        
-    }
-    
-    private func saveVideoToAlbum(videoUrl: URL) {
-        var info = ""
-        PHPhotoLibrary.shared().performChanges({
-            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoUrl)
-        }) { (success, error) in
-            if success {
-                info = "hello"
-            } else {
-                info = "保存失败，err = \(error.debugDescription)"
-            }
-            
-            print(info)
-            
-            
-        }
-    }
-}
-
-
 extension CMTime {
-    //    var isValid : Bool { return (flags & .Valid) != nil }
-    var isValid : Bool { return flags.contains(.valid) }
+    var isValid: Bool { return flags.contains(.valid) }
 }
-
 
 extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
     
     
     
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard output != nil,
-              sampleBuffer != nil,
-              connection != nil,
-              CMSampleBufferDataIsReady(sampleBuffer) else { return }
+        guard CMSampleBufferDataIsReady(sampleBuffer) else { return }
 
         let writable = canWrite()
 
@@ -280,8 +205,7 @@ extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptu
         }
 
         if writable, output == output {
-            //              ... //Your old code when make the overlay here
-            
+
             if videoWriterInput.isReadyForMoreMediaData {
                 //Write video buffer
                 print("<<<<<<  videoWriterInput.append --- \(recorderState)")
@@ -291,7 +215,6 @@ extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptu
                 if deltaTime >= CMTimeMake(value: 1, timescale: Int32(fps)) {
                     lastTimestamp = timestamp
                     let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
-                    //        print("fps\(timestamp)")
                     delegate?.videoCapture(self, didCaptureVideoFrame: imageBuffer, timestamp: timestamp)
                 }
             }
@@ -302,14 +225,12 @@ extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptu
         } else {
             switch recorderState {
             case .Stopped:
-//                let i = 0
-                //                 print("<<<<<<<< should not have got a call when player is stopped")
+                print("<<<<<<<< should not have got a call when player is stopped")
                 break
             case .Recording:
                 print("<<<<<<<< should be here when player is Recording")
             case .Paused:
-//                let i = 0
-                //                print("<<<<<<<< not writing when player is paused")
+                print("<<<<<<<< not writing when player is paused")
                 break
             case .NotReady:
                 print("<<<<<<<< should not have got a call when player is not ready")

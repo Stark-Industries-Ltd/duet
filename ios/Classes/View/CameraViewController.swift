@@ -16,6 +16,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var cameraPreviewContainer: UIView!
     @IBOutlet weak var heightContraintCamera: NSLayoutConstraint!
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
+    @IBOutlet weak var imageBackground: UIImageView!
     private var player: AVPlayer?
     var viewArgs: DuetViewArgs?
     private var videoUrl: URL?
@@ -23,26 +24,30 @@ class CameraViewController: UIViewController {
     private lazy var captureStack = CVRecorder(delegate: self)
     private var isObjectDetectionEnabled = false
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        initVideo()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configVideo()
+        loadImageBackground()
     }
 
-    private func initVideo() {
-
-        //2. Create AVPlayer object
-        var asset: AVAsset
-        if let url = viewArgs?.url {
-            asset = AVAsset(url: url)
-            videoUrl = url
-        } else {
-            guard let path = Bundle.main.path(forResource: "manhdz", ofType:"mp4") else {
-                print("video.m4v not found")
-                return
-            }
-            asset = AVAsset(url: URL(fileURLWithPath: path))
-            videoUrl = URL(fileURLWithPath: path)
+    private func loadImageBackground() {
+        guard let image = viewArgs?.image,
+           let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: image),
+           let path = Bundle.main.path(forResource: key, ofType: nil) else {
+               print("load image error")
+               return
         }
+        imageBackground.image = UIImage(contentsOfFile: path)
+    }
+
+    private func configVideo() {
+        guard let url = viewArgs?.urlVideo else {
+            print("load video error")
+            return
+        }
+        let asset = AVAsset(url: url)
+        videoUrl = url
+
         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
 
         // Register for notification
@@ -54,14 +59,14 @@ class CameraViewController: UIViewController {
         let playerLayer = AVPlayerLayer(player: player)
         let width = UIScreen.main.bounds.width / 2
         let height = width * asset.ratio
-        heightContraintCamera.constant = height
-        heightContraintVideo.constant = height
+
         playerLayer.frame = CGRect(x: 0, y: 0,
                                    width: width,
                                    height: height)
 
-        // Executed right before playing avqueueplayer media
         AudioRecorder.setAudio()
+        heightContraintCamera.constant = height
+        heightContraintVideo.constant = height
 
         self.videoView.layer.addSublayer(playerLayer)
     }
@@ -92,39 +97,49 @@ extension CameraViewController {
 extension CameraViewController {
 
     func startRecording() {
-        captureStack.recorderState = .Recording
-        CameraEngine.shared.startCapture()
         player?.play()
+        CameraEngine.shared.startCapture()
+//        AudioRecorderManager.shared.startRecording()
+        captureStack.recorderState = .Recording
     }
 
     func pauseRecording() {
-        captureStack.recorderState = .Paused
-        CameraEngine.shared.pauseCapture()
         player?.pause()
+        CameraEngine.shared.pauseCapture()
+//        AudioRecorderManager.shared.finishRecording { url in
+//            url.presentShareActivity(viewController: self)
+//        }
+        captureStack.recorderState = .Paused
     }
 
     func resumeRecording() {
-        captureStack.recorderState = .Recording
-        CameraEngine.shared.resumeCapture()
         player?.play()
+        CameraEngine.shared.resumeCapture()
+//        AudioRecorderManager.shared.startRecording()
+        captureStack.recorderState = .Recording
     }
 
     func resetRecoding() {
-        captureStack.recorderState = .Stopped
-        CameraEngine.shared.resetCapture()
         player?.pause()
         player?.seek(to: CMTime.zero)
+        CameraEngine.shared.resetCapture()
+//        AudioRecorderManager.shared.resetAudio()
+        captureStack.recorderState = .Stopped
     }
 
     private func finishRecording() {
         captureStack.recorderState = .Stopped
         CameraEngine.shared.stopCapturing { [weak self] cameraRecordUrl in
-            SwiftDuetPlugin.notifyFlutter(event: .VIDEO_RECORDED, arguments: cameraRecordUrl.path)
+//            SwiftDuetPlugin.notifyFlutter(event: .VIDEO_RECORDED, arguments: cameraRecordUrl.path)
             guard let self = self else {
                 return
             }
             self.mergeVideos(cameraRecordUrl: cameraRecordUrl)
         }
+
+//        AudioRecorderManager.shared.finishRecording { url in
+//
+//        }
     }
 
     private func mergeVideos(cameraRecordUrl: URL) {

@@ -17,5 +17,9 @@ class Duet {
 
   Future<String?> recordDuet() => DuetPlatform.instance.recordDuet();
 
+  Future<String?> resumeDuet() => DuetPlatform.instance.resumeDuet();
+
+  Future<String?> pauseDuet() => DuetPlatform.instance.pauseDuet();
+
   Future<String?> resetDuet() => DuetPlatform.instance.resetDuet();
 }

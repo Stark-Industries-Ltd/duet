@@ -34,24 +34,37 @@ class MethodChannelDuet extends DuetPlatform {
   }
 
   @override
-  Future<String?> resetDuet() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.reset);
+  Future<String?> recordDuet() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.record);
     return result;
   }
 
   @override
-  Future<String?> recordDuet() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.record);
+  Future<String?> pauseDuet() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.pause);
+    return result;
+  }
+
+  @override
+  Future<String?> resumeDuet() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.resume);
+    return result;
+  }
+
+  @override
+  Future<String?> resetDuet() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.reset);
     return result;
   }
 }
 
 class DuetConst {
   static const String record = 'RECORD';
+  static const String pause = 'PAUSE';
+  static const String resume = 'RESUME';
   static const String reset = 'RESET';
 
   // Native call
-
   static const String audioResult = 'AUDIO_RESULT';
   static const String videoRecorded = 'VIDEO_RECORDED';
   static const String videoMerged = 'VIDEO_MERGED';
