@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:duet/duet.dart';
@@ -40,14 +39,7 @@ class _CameraViewState extends State<CameraView> {
   final url =
       'https://dphw5vqyyotoi.cloudfront.net/upload/5c209fe6176b0/2023/05/05/dd92_manhdz.mp4';
   final _duetPlugin = Duet();
-  int time = 0;
-
-  final listDuetScrip = [
-    DuetScrip(time: 9, duration: 2),
-    DuetScrip(time: 13, duration: 2),
-    DuetScrip(time: 18, duration: 2),
-    DuetScrip(time: 23, duration: 2),
-  ];
+  String _recordFilePath = '';
 
   @override
   void initState() {
@@ -56,35 +48,24 @@ class _CameraViewState extends State<CameraView> {
       onAudioReceived: printHau,
       onVideoMerged: printHau,
       onVideoRecorded: (url) {
+        setState(() {
+          _duetPlugin.stopCamera();
+          _recordFilePath = url;
+        });
         print('onVideoRecorded: $url');
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => PlayVideosScreen(
-              recordFilePath: url,
-            ),
-          ),
-        );
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //     builder: (context) => PlayVideosScreen(
+        //       recordFilePath: url,
+        //     ),
+        //   ),
+        // );
       },
       onTimerVideoReceived: _handleVideoTime,
     );
   }
 
-  Timer? _timer;
-
-  _handleVideoTime(timer) {
-    final videoTime = double.tryParse(timer);
-    if (videoTime != null && time != videoTime.round()) {
-      time = videoTime.round();
-      // listDuetScrip
-      final duetScrip = listDuetScrip.firstWhere((e) => e.time == time);
-      _duetPlugin.pauseDuet();
-      _timer?.cancel();
-      _timer = Timer(Duration(seconds: duetScrip.duration), () {
-        _duetPlugin.pauseAudio();
-        _timer?.cancel();
-      });
-    }
-  }
+  _handleVideoTime(timer) {}
 
   void printHau(String? url) {
     print('HAUHAUHAU:$url');
@@ -94,12 +75,31 @@ class _CameraViewState extends State<CameraView> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Stack(
-          children: [
-            DuetView(args: DuetViewArgs(url: url)),
-            _buildButton(context),
-          ],
-        ),
+        body: _recordFilePath.isNotEmpty
+            ? Stack(
+                children: [
+                  PlayVideosScreen(
+                    recordFilePath: _recordFilePath,
+                  ),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _duetPlugin.startCamera();
+                          _recordFilePath = '';
+                        });
+                      },
+                      child: const Text('back'),
+                    ),
+                  ),
+                ],
+              )
+            : Stack(
+                children: [
+                  DuetView(args: DuetViewArgs(url: url)),
+                  _buildButton(context),
+                ],
+              ),
       ),
     );
   }

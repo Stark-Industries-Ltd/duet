@@ -15,18 +15,10 @@ public protocol CVRecorderDelegate: AnyObject {
 
 public class CVRecorder {
     private weak var delegate: CVRecorderDelegate?
-    private weak var parentViewForPreview: UIView?
     private var recoderView: CVRecorderView!
 
     public init(delegate: CVRecorderDelegate) {
         self.delegate = delegate
-    }
-}
-
-extension CVRecorder {
-    public func loadCaptureStack(parentViewForPreview: UIView) {
-        self.parentViewForPreview = parentViewForPreview
-        CameraEngine.shared.startup(parentViewForPreview)
     }
 }
 

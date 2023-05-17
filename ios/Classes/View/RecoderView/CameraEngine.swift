@@ -38,6 +38,7 @@ public class CameraEngine: NSObject {
 
     public func startup(_ parentView: UIView) {
         guard session == nil else {
+            setUpPreview(parentView: parentView)
             return
         }
         print("Starting up server")
@@ -97,17 +98,8 @@ public class CameraEngine: NSObject {
             audioConnection = audioout.connection(with: .audio)
             session.commitConfiguration()
 
-            let previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
-            // importent line of code what will did a trick
-            previewLayer.videoGravity = .resizeAspectFill
-            let rootLayer = parentView.layer
-            rootLayer.masksToBounds = true
-            previewLayer.frame = CGRect(x: 0, y: 0,
-                                        width: parentView.frame.width,
-                                        height: parentView.frame.height
-            )
-            rootLayer.insertSublayer(previewLayer, at: 0)
-            self.preview = previewLayer
+            setUpPreview(parentView: parentView)
+
             DispatchQueue.global(qos: .userInitiated).async {
                 self.session.startRunning()
             }
@@ -126,6 +118,20 @@ public class CameraEngine: NSObject {
         }
 
         return nil
+    }
+
+    func setUpPreview(parentView: UIView) {
+        let previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
+        // importent line of code what will did a trick
+        previewLayer.videoGravity = .resizeAspectFill
+        let rootLayer = parentView.layer
+        rootLayer.masksToBounds = true
+        previewLayer.frame = CGRect(x: 0, y: 0,
+                                    width: parentView.frame.width,
+                                    height: parentView.frame.height
+        )
+        rootLayer.insertSublayer(previewLayer, at: 0)
+        self.preview = previewLayer
     }
 
     public func startCapture() {

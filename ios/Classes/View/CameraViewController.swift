@@ -87,19 +87,11 @@ class CameraViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        setupCaptureStack()
+        CameraEngine.shared.startup(cameraPreviewContainer)
     }
 
     deinit {
         NotificationCenter.default.removeObserver(self)
-        
-    }
-}
-
-extension CameraViewController {
-
-    private func setupCaptureStack() {
-        captureStack.loadCaptureStack(parentViewForPreview: cameraPreviewContainer)
     }
 }
 
