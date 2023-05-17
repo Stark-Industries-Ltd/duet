@@ -8,6 +8,8 @@ enum DuetType: String {
     case resetDuet   = "RESET_DUET"
     case recordAudio = "RECORD_AUDIO"
     case pauseAudio  = "PAUSE_AUDIO"
+    case startCamera  = "START_CAMERA"
+    case stopCamera  = "STOP_CAMERA"
 }
 
 @available(iOS 10.0, *)
@@ -32,22 +34,20 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
         switch(call.method){
         case DuetType.recordDuet.rawValue:
             FLNativeView.controller?.startRecording()
-            result("RECORD result from native")
         case DuetType.pauseDuet.rawValue:
             FLNativeView.controller?.pauseRecording()
-            result("RECORD result from native")
         case DuetType.resumeDuet.rawValue:
             FLNativeView.controller?.resumeRecording()
-            result("RECORD result from native")
         case DuetType.resetDuet.rawValue:
-            result("RESET result from native")
             FLNativeView.controller?.resetRecoding()
         case DuetType.recordAudio.rawValue:
-            result("Record Audio result from native")
             FLNativeView.controller?.startRecordingAudio()
         case DuetType.pauseAudio.rawValue:
-            result("Pause Audio from native")
             FLNativeView.controller?.pauseRecordingAudio()
+        case DuetType.startCamera.rawValue:
+            FLNativeView.controller?.startCamera()
+        case DuetType.stopCamera.rawValue:
+            FLNativeView.controller?.stopCamera()
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }

@@ -108,7 +108,7 @@ public class CameraEngine: NSObject {
             )
             rootLayer.insertSublayer(previewLayer, at: 0)
             self.preview = previewLayer
-            DispatchQueue.global(qos: .background).async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 self.session.startRunning()
             }
         } catch (let error) {
@@ -186,15 +186,20 @@ public class CameraEngine: NSObject {
         }
     }
 
-    public func shutdown() {
-        print("Shutting down camera server")
-        if session != nil {
-            session.stopRunning()
-            session = nil
+    public func startSession() {
+        guard session != nil else {
+            return
         }
-        encoder?.finishwithCompletionHandler { url in
-            print("Capture completed")
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.session.startRunning()
         }
+    }
+
+    public func stopSession() {
+        guard session != nil else {
+            return
+        }
+        session.stopRunning()
     }
 }
 

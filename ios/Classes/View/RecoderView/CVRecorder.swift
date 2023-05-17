@@ -18,12 +18,6 @@ public class CVRecorder {
     private weak var parentViewForPreview: UIView?
     private var recoderView: CVRecorderView!
 
-    var recorderState: RecorderState = .NotReady {
-        didSet {
-            delegate?.didChangedRecorderState(recorderState)
-        }
-    }
-
     public init(delegate: CVRecorderDelegate) {
         self.delegate = delegate
     }
@@ -33,7 +27,6 @@ extension CVRecorder {
     public func loadCaptureStack(parentViewForPreview: UIView) {
         self.parentViewForPreview = parentViewForPreview
         CameraEngine.shared.startup(parentViewForPreview)
-        recorderState = .Stopped
     }
 }
 

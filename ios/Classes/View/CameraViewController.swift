@@ -92,6 +92,7 @@ class CameraViewController: UIViewController {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        
     }
 }
 
@@ -99,6 +100,17 @@ extension CameraViewController {
 
     private func setupCaptureStack() {
         captureStack.loadCaptureStack(parentViewForPreview: cameraPreviewContainer)
+    }
+}
+
+extension CameraViewController {
+
+    func startCamera() {
+        CameraEngine.shared.startSession()
+    }
+
+    func stopCamera() {
+        CameraEngine.shared.stopSession()
     }
 }
 
@@ -117,31 +129,26 @@ extension CameraViewController {
     func startRecording() {
         player?.play()
         CameraEngine.shared.startCapture()
-        captureStack.recorderState = .Recording
     }
 
     func pauseRecording() {
         player?.pause()
         CameraEngine.shared.pauseCapture()
-        captureStack.recorderState = .Paused
     }
 
     func resumeRecording() {
         player?.play()
         CameraEngine.shared.resumeCapture()
-        captureStack.recorderState = .Recording
     }
 
     func resetRecoding() {
         player?.pause()
         player?.seek(to: CMTime.zero)
-        CameraEngine.shared.resetCapture()
+        startCamera()
         AudioRecorderManager.shared.resetAudio()
-        captureStack.recorderState = .Stopped
     }
 
     private func finishRecording() {
-        captureStack.recorderState = .Stopped
         CameraEngine.shared.stopCapturing { [weak self] cameraRecordUrl in
             SwiftDuetPlugin.notifyFlutter(event: .VIDEO_RECORDED, arguments: cameraRecordUrl.path)
             guard let self = self else {

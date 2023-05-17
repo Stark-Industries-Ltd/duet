@@ -28,4 +28,8 @@ class Duet {
   Future<String?> recordAudio() => DuetPlatform.instance.recordAudio();
 
   Future<String?> pauseAudio() => DuetPlatform.instance.pauseAudio();
+
+  Future<String?> startCamera() => DuetPlatform.instance.startCamera();
+
+  Future<String?> stopCamera() => DuetPlatform.instance.stopCamera();
 }

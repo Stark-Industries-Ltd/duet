@@ -72,6 +72,18 @@ class MethodChannelDuet extends DuetPlatform {
     final result = methodChannel.invokeMethod<String>(DuetConst.recordAudio);
     return result;
   }
+
+  @override
+  Future<String?> startCamera() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.startCamera);
+    return result;
+  }
+
+  @override
+  Future<String?> stopCamera() {
+    final result = methodChannel.invokeMethod<String>(DuetConst.stopCamera);
+    return result;
+  }
 }
 
 class DuetConst {
@@ -81,6 +93,8 @@ class DuetConst {
   static const String resetDuet = 'RESET_DUET';
   static const String recordAudio = 'RECORD_AUDIO';
   static const String pauseAudio = 'PAUSE_AUDIO';
+  static const String startCamera = 'START_CAMERA';
+  static const String stopCamera = 'STOP_CAMERA';
 
   // Native call
   static const String audioResult = 'AUDIO_RESULT';
