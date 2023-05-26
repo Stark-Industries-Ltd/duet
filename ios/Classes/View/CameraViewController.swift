@@ -104,6 +104,10 @@ extension CameraViewController {
     func stopCamera() {
         CameraEngine.shared.stopSession()
     }
+
+    func resetCamera() {
+        CameraEngine.shared.resetCapture()
+    }
 }
 
 extension CameraViewController {

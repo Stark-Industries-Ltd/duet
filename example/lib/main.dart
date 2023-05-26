@@ -9,12 +9,37 @@ void main() {
   runApp(const MyApp());
 }
 
+class MainScreen extends StatefulWidget {
+  const MainScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+      child: ElevatedButton(
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CameraView(),
+          ),
+        ),
+        child: const Text('Open Camera'),
+      ),
+    ));
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: CameraView());
+    return const MaterialApp(home: MainScreen());
   }
 }
 
@@ -44,6 +69,7 @@ class _CameraViewState extends State<CameraView> {
   @override
   void initState() {
     super.initState();
+    _duetPlugin.startCamera();
     _duetPlugin.onNativeCall(
       onAudioReceived: printHau,
       onVideoMerged: printHau,
@@ -123,6 +149,14 @@ class _CameraViewState extends State<CameraView> {
               _duetPlugin.recordAudio();
             },
             child: const Text('Record Audio'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _duetPlugin.stopCamera();
+              _duetPlugin.resetCamera();
+              Navigator.pop(context);
+            },
+            child: const Text('back'),
           ),
         ],
       ),

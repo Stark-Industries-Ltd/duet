@@ -14,9 +14,9 @@ import Vision
 public class CameraEngine: NSObject {
 
     public static let shared = CameraEngine()
-    private var session: AVCaptureSession!
-    private var preview: AVCaptureVideoPreviewLayer!
-    private var captureQueue: DispatchQueue!
+    private var session: AVCaptureSession?
+    private var preview: AVCaptureVideoPreviewLayer?
+    private var captureQueue: DispatchQueue?
     private let serialQueue = DispatchQueue(label: "CameraEngine.serialQueue")
     private let detectorSerialQueue = DispatchQueue(label: "CameraEngine.detectorSerialQueue")
     private var audioConnection: AVCaptureConnection?
@@ -50,6 +50,11 @@ public class CameraEngine: NSObject {
 
         //create capture device with video
         session = AVCaptureSession()
+
+        guard let session = session else {
+            return
+        }
+
         session.sessionPreset = .photo
         let cameraDevice = cameraWithPosition(position: .front)
         //Setup your microphone
@@ -100,8 +105,8 @@ public class CameraEngine: NSObject {
 
             setUpPreview(parentView: parentView)
 
-            DispatchQueue.global(qos: .userInitiated).async {
-                self.session.startRunning()
+            DispatchQueue.global(qos: .background).async {
+                session.startRunning()
             }
         } catch (let error) {
             print("********** camera engine startup() \(error.localizedDescription)")
@@ -121,7 +126,10 @@ public class CameraEngine: NSObject {
     }
 
     func setUpPreview(parentView: UIView) {
-        let previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
+        guard let session = session else {
+            return
+        }
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
         // importent line of code what will did a trick
         previewLayer.videoGravity = .resizeAspectFill
         let rootLayer = parentView.layer
@@ -135,7 +143,7 @@ public class CameraEngine: NSObject {
     }
 
     public func startCapture() {
-        captureQueue.sync {
+        captureQueue?.sync {
             if !self.isCapturing {
                 print("<<<<<<<<< Start capturing")
                 encoder = nil
@@ -148,13 +156,13 @@ public class CameraEngine: NSObject {
     }
 
     public func stopCapturing(_ completion: @escaping((URL) -> Void)) {
-        captureQueue.sync {
+        captureQueue?.sync {
             if self.isCapturing {
                 print("<<<<<<<<< stop capturing")
                 currentFile += 1
                 //serialize with audio and video capture
                 isCapturing = false
-                captureQueue.async {
+                captureQueue?.async {
                     self.encoder?.finishwithCompletionHandler { [weak self] url in
                         completion(url)
                         guard let self = self else { return }
@@ -171,10 +179,12 @@ public class CameraEngine: NSObject {
     public func resetCapture() {
         self.isCapturing = false
         self.encoder = nil
+        self.captureQueue = nil
+        self.preview = nil
     }
 
     public func pauseCapture() {
-        captureQueue.sync {
+        captureQueue?.sync {
             if self.isCapturing {
                 print("<<<<<<<<< Initiating pause capture")
                 self.isPaused = true
@@ -184,7 +194,7 @@ public class CameraEngine: NSObject {
     }
 
     public func resumeCapture() {
-        captureQueue.sync {
+        captureQueue?.sync {
             if self.isCapturing {
                 print("<<<<<<<<< resuming capture")
                 self.isPaused = false
@@ -193,16 +203,19 @@ public class CameraEngine: NSObject {
     }
 
     public func startSession() {
-        guard session != nil else {
+        guard let session = session else {
             return
         }
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.session.startRunning()
+        if session.isRunning {
+            return
+        }
+        DispatchQueue.global(qos: .background).async {
+            session.startRunning()
         }
     }
 
     public func stopSession() {
-        guard session != nil else {
+        guard let session = session else {
             return
         }
         session.stopRunning()

@@ -10,6 +10,7 @@ enum DuetType: String {
     case pauseAudio  = "PAUSE_AUDIO"
     case startCamera  = "START_CAMERA"
     case stopCamera  = "STOP_CAMERA"
+    case resetCamera  = "RESET_CAMERA"
 }
 
 @available(iOS 10.0, *)
@@ -48,6 +49,8 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
             FLNativeView.controller?.startCamera()
         case DuetType.stopCamera.rawValue:
             FLNativeView.controller?.stopCamera()
+        case DuetType.resetCamera.rawValue:
+            FLNativeView.controller?.resetCamera()
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
