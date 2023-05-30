@@ -89,6 +89,10 @@ class _CameraViewState extends State<CameraView> {
       },
       onTimerVideoReceived: _handleVideoTime,
     );
+
+    Future.delayed(const Duration(seconds: 1), () {
+      _duetPlugin.playSound('assets/duet_start.m4a');
+    });
   }
 
   _handleVideoTime(timer) {}
@@ -136,7 +140,13 @@ class _CameraViewState extends State<CameraView> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           ElevatedButton(
-            onPressed: () => _duetPlugin.recordDuet(),
+            onPressed: () {
+              _duetPlugin.playSound('assets/duet_321go.m4a');
+
+              Future.delayed(const Duration(seconds: 4), () {
+                _duetPlugin.recordDuet();
+              });
+            },
             child: const Text('Record'),
           ),
           ElevatedButton(

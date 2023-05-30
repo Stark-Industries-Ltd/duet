@@ -18,6 +18,7 @@ class CameraViewController: UIViewController {
     @IBOutlet weak var heightContraintVideo: NSLayoutConstraint!
     @IBOutlet weak var imageBackground: UIImageView!
     private var player: AVPlayer?
+    private var audioPlayer: AVAudioPlayer?
     var viewArgs: DuetViewArgs?
     private var videoUrl: URL?
 
@@ -92,6 +93,21 @@ class CameraViewController: UIViewController {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+
+    func playSound(url: String) {
+        guard let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: url),
+              let path = Bundle.main.path(forResource: key, ofType: nil) else {
+            return
+        }
+        let url = URL(fileURLWithPath: path)
+
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.play()
+        } catch let error {
+            print(error.localizedDescription)
+        }
     }
 }
 

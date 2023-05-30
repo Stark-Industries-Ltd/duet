@@ -34,4 +34,6 @@ class Duet {
   Future<String?> stopCamera() => DuetPlatform.instance.stopCamera();
 
   Future<String?> resetCamera() => DuetPlatform.instance.resetCamera();
+
+  Future<String?> playSound(String url) => DuetPlatform.instance.playSound(url);
 }

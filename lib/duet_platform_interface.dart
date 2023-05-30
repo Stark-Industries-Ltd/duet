@@ -47,4 +47,6 @@ abstract class DuetPlatform extends PlatformInterface {
   Future<String?> stopCamera();
 
   Future<String?> resetCamera();
+
+  Future<String?> playSound(String url);
 }
