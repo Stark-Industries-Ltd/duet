@@ -179,7 +179,7 @@ extension CameraViewController {
         let height = heightContraintCamera.constant
         guard let videoUrl = videoUrl else { return }
         cameraRecordUrl.gridMergeVideos(urlVideo: videoUrl,
-                                        cGSize: CGSize(width: 1920, height: 1080)
+                                        cGSize: CGSize(width: 810, height: 720)
         )
     }
 }

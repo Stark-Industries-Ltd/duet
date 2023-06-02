@@ -357,14 +357,6 @@ extension DPVideoMerger : VideoMerger {
             let rowIndex = CGFloat(i / Int(columns))
             //            debugPrint("\(columnIndex) x \(rowIndex)")
             
-            
-            // TODO remove hardcode tx
-            if(i == 0){
-                tx = 353
-            }else{
-                tx = 0
-            }
-            
             Move = CGAffineTransform(translationX: CGFloat((videoResolution.width / columns)*columnIndex) + tx, y: CGFloat((videoResolution.width / rows)*rowIndex) + ty)
 
             guard insertVideoWithTransform(isRepeatVideo, subInstruction, orientation.concatenating(Scale), Move, &arrAVMutableVideoCompositionLayerInstruction, asset, composition, completion, maxTime) else {
