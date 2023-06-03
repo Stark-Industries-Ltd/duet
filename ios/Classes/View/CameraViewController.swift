@@ -154,9 +154,7 @@ extension CameraViewController {
     }
 
     func resetRecoding() {
-        player?.pause()
-        player?.seek(to: CMTime.zero)
-        startCamera()
+        resetCamera()
         AudioRecorderManager.shared.resetAudio()
     }
 
@@ -175,8 +173,6 @@ extension CameraViewController {
     }
 
     private func mergeVideos(cameraRecordUrl: URL) {
-        let width = UIScreen.main.bounds.width
-        let height = heightContraintCamera.constant
         guard let videoUrl = videoUrl else { return }
         cameraRecordUrl.gridMergeVideos(urlVideo: videoUrl,
                                         cGSize: CGSize(width: 810, height: 720)

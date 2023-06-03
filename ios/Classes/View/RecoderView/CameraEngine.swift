@@ -179,7 +179,6 @@ public class CameraEngine: NSObject {
     public func resetCapture() {
         self.isCapturing = false
         self.encoder = nil
-        self.captureQueue = nil
         self.preview = nil
     }
 
