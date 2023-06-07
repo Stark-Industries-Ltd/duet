@@ -69,29 +69,20 @@ class _CameraViewState extends State<CameraView> {
   @override
   void initState() {
     super.initState();
-    _duetPlugin.startCamera();
     _duetPlugin.onNativeCall(
       onAudioReceived: printHau,
       onVideoMerged: printHau,
       onVideoRecorded: (url) {
         setState(() {
-          _duetPlugin.stopCamera();
           _recordFilePath = url;
         });
         print('onVideoRecorded: $url');
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (context) => PlayVideosScreen(
-        //       recordFilePath: url,
-        //     ),
-        //   ),
-        // );
       },
       onTimerVideoReceived: _handleVideoTime,
     );
 
     Future.delayed(const Duration(seconds: 1), () {
-      _duetPlugin.playSound('assets/duet_start.m4a');
+      _duetPlugin.playSound({'url': 'assets/duet_start.m4a'});
     });
   }
 
@@ -115,7 +106,6 @@ class _CameraViewState extends State<CameraView> {
                     child: ElevatedButton(
                       onPressed: () {
                         setState(() {
-                          _duetPlugin.startCamera();
                           _recordFilePath = '';
                         });
                       },
@@ -141,17 +131,17 @@ class _CameraViewState extends State<CameraView> {
         children: [
           ElevatedButton(
             onPressed: () {
-              _duetPlugin.playSound('assets/duet_321go.m4a');
+              _duetPlugin.playSound({'url': 'assets/duet_321go.m4a'});
 
               Future.delayed(const Duration(seconds: 4), () {
                 _duetPlugin.recordDuet();
+                _duetPlugin.playSound({
+                  'url': 'assets/duet_soundtrack.m4a',
+                  'loop': true,
+                });
               });
             },
             child: const Text('Record'),
-          ),
-          ElevatedButton(
-            onPressed: () => _duetPlugin.resetDuet(),
-            child: const Text('Reset'),
           ),
           ElevatedButton(
             onPressed: () {
@@ -162,8 +152,6 @@ class _CameraViewState extends State<CameraView> {
           ),
           ElevatedButton(
             onPressed: () {
-              _duetPlugin.stopCamera();
-              _duetPlugin.resetCamera();
               Navigator.pop(context);
             },
             child: const Text('back'),

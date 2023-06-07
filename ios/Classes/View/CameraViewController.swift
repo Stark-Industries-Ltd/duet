@@ -22,11 +22,14 @@ class CameraViewController: UIViewController {
     var viewArgs: DuetViewArgs?
     private var videoUrl: URL?
 
+    var cameraView: CameraEngine?
+
     private lazy var captureStack = CVRecorder(delegate: self)
     private var isObjectDetectionEnabled = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        cameraView = CameraEngine()
         configVideo()
         loadImageBackground()
     }
@@ -88,15 +91,26 @@ class CameraViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        CameraEngine.shared.startup(cameraPreviewContainer)
+        cameraView?.startup(cameraPreviewContainer)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        audioPlayer = nil
+        player = nil
+        cameraView?.stopSession()
+        cameraView = nil
+        AudioRecorderManager.shared.resetAudio()
     }
 
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
 
-    func playSound(url: String) {
-        guard let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: url),
+    func playSound(args: [String: AnyObject]) {
+        let loop = args["loop"] as? Bool
+        guard let asset = args["url"] as? String,
+              let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: asset),
               let path = Bundle.main.path(forResource: key, ofType: nil) else {
             return
         }
@@ -104,25 +118,14 @@ class CameraViewController: UIViewController {
 
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
+            //infinite loop
+            if loop == true {
+                audioPlayer?.numberOfLoops =  -1
+            }
             audioPlayer?.play()
         } catch let error {
             print(error.localizedDescription)
         }
-    }
-}
-
-extension CameraViewController {
-
-    func startCamera() {
-        CameraEngine.shared.startSession()
-    }
-
-    func stopCamera() {
-        CameraEngine.shared.stopSession()
-    }
-
-    func resetCamera() {
-        CameraEngine.shared.resetCapture()
     }
 }
 
@@ -140,26 +143,21 @@ extension CameraViewController {
 
     func startRecording() {
         player?.play()
-        CameraEngine.shared.startCapture()
+        cameraView?.startCapture()
     }
 
     func pauseRecording() {
         player?.pause()
-        CameraEngine.shared.pauseCapture()
+        cameraView?.pauseCapture()
     }
 
     func resumeRecording() {
         player?.play()
-        CameraEngine.shared.resumeCapture()
-    }
-
-    func resetRecoding() {
-        resetCamera()
-        AudioRecorderManager.shared.resetAudio()
+        cameraView?.resumeCapture()
     }
 
     private func finishRecording() {
-        CameraEngine.shared.stopCapturing { [weak self] cameraRecordUrl in
+        cameraView?.stopCapturing { [weak self] cameraRecordUrl in
             SwiftDuetPlugin.notifyFlutter(event: .VIDEO_RECORDED, arguments: cameraRecordUrl.path)
             guard let self = self else {
                 return

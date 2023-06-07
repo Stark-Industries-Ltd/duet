@@ -23,17 +23,9 @@ class Duet {
 
   Future<String?> pauseDuet() => DuetPlatform.instance.pauseDuet();
 
-  Future<String?> resetDuet() => DuetPlatform.instance.resetDuet();
-
   Future<String?> recordAudio() => DuetPlatform.instance.recordAudio();
 
   Future<String?> pauseAudio() => DuetPlatform.instance.pauseAudio();
 
-  Future<String?> startCamera() => DuetPlatform.instance.startCamera();
-
-  Future<String?> stopCamera() => DuetPlatform.instance.stopCamera();
-
-  Future<String?> resetCamera() => DuetPlatform.instance.resetCamera();
-
-  Future<String?> playSound(String url) => DuetPlatform.instance.playSound(url);
+  Future<String?> playSound(Map args) => DuetPlatform.instance.playSound(args);
 }

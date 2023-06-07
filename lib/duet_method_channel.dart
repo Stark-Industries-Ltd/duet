@@ -92,8 +92,9 @@ class MethodChannelDuet extends DuetPlatform {
   }
 
   @override
-  Future<String?> playSound(String url) {
-    final result = methodChannel.invokeMethod<String>(DuetConst.playSound, url);
+  Future<String?> playSound(Map args) {
+    final result =
+        methodChannel.invokeMethod<String>(DuetConst.playSound, args);
     return result;
   }
 }

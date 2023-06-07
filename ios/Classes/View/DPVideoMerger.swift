@@ -45,6 +45,8 @@ extension DPVideoMerger : VideoMerger {
         "AVURLAssetOutOfBandMIMETypeKey": "video/mp4"
     ]
 
+    static var exporter: AVAssetExportSession?
+
     /// Multiple videos merge in one video with manage scale & aspect ratio
     /// - Parameters:
     ///   - videoFileURLs: Video file path URLs, Array of videos that going to merge
@@ -549,21 +551,21 @@ fileprivate extension DPVideoMerger {
         
         let url = URL(fileURLWithPath: generateMergedVideoFilePath())
         
-        let exporter = AVAssetExportSession(asset: composition, presetName: videoQuality)
-        exporter?.outputURL = url
-        exporter?.videoComposition = mainComposition
-        exporter?.outputFileType = .mp4
-        exporter?.shouldOptimizeForNetworkUse = true
+        DPVideoMerger.exporter = AVAssetExportSession(asset: composition, presetName: videoQuality)
+        DPVideoMerger.exporter?.outputURL = url
+        DPVideoMerger.exporter?.videoComposition = mainComposition
+        DPVideoMerger.exporter?.outputFileType = .mp4
+        DPVideoMerger.exporter?.shouldOptimizeForNetworkUse = true
         
         debugPrint("Composition Duration: %ld s", lround(CMTimeGetSeconds(composition.duration)))
         debugPrint("Composition Framerate: %d fps", highestFrameRate)
         
         let exportCompletion: (() -> Void) = {() -> Void in
             DispatchQueue.main.async(execute: {() -> Void in
-                completion(exporter?.outputURL, exporter?.error)
+                completion(DPVideoMerger.exporter?.outputURL, DPVideoMerger.exporter?.error)
             })
         }
-        if let exportSession = exporter {
+        if let exportSession = DPVideoMerger.exporter {
             exportSession.exportAsynchronously(completionHandler: {() -> Void in
                 switch exportSession.status {
                 case .completed:

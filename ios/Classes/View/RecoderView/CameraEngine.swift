@@ -11,9 +11,8 @@ import AssetsLibrary
 import Photos
 import Vision
 
-public class CameraEngine: NSObject {
+class CameraEngine: NSObject {
 
-    public static let shared = CameraEngine()
     private var session: AVCaptureSession?
     private var preview: AVCaptureVideoPreviewLayer?
     private var captureQueue: DispatchQueue?
@@ -176,12 +175,6 @@ public class CameraEngine: NSObject {
         }
     }
 
-    public func resetCapture() {
-        self.isCapturing = false
-        self.encoder = nil
-        self.preview = nil
-    }
-
     public func pauseCapture() {
         captureQueue?.sync {
             if self.isCapturing {
@@ -198,18 +191,6 @@ public class CameraEngine: NSObject {
                 print("<<<<<<<<< resuming capture")
                 self.isPaused = false
             }
-        }
-    }
-
-    public func startSession() {
-        guard let session = session else {
-            return
-        }
-        if session.isRunning {
-            return
-        }
-        DispatchQueue.global(qos: .background).async {
-            session.startRunning()
         }
     }
 
