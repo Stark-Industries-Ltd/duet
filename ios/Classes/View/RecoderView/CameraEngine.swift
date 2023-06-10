@@ -17,7 +17,6 @@ class CameraEngine: NSObject {
     private var preview: AVCaptureVideoPreviewLayer?
     private var captureQueue: DispatchQueue?
     private let serialQueue = DispatchQueue(label: "CameraEngine.serialQueue")
-    private let detectorSerialQueue = DispatchQueue(label: "CameraEngine.detectorSerialQueue")
     private var audioConnection: AVCaptureConnection?
     private var videoConnection: AVCaptureConnection?
     private var encoder: VideoEncoder?
@@ -187,11 +186,11 @@ class CameraEngine: NSObject {
 
     public func resumeCapture() {
         captureQueue?.sync {
-            if self.isCapturing {
-                print("<<<<<<<<< resuming capture")
-                self.isPaused = false
-            }
+        if self.isCapturing {
+            print("<<<<<<<<< resuming capture")
+            self.isPaused = false
         }
+    }
     }
 
     public func stopSession() {

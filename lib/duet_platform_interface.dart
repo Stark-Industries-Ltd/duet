@@ -40,5 +40,5 @@ abstract class DuetPlatform extends PlatformInterface {
 
   Future<String?> pauseAudio();
 
-  Future<String?> playSound(Map args);
+  Future<String?> playSound(String url);
 }

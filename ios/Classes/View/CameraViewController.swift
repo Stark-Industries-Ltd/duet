@@ -107,10 +107,8 @@ class CameraViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
 
-    func playSound(args: [String: AnyObject]) {
-        let loop = args["loop"] as? Bool
-        guard let asset = args["url"] as? String,
-              let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: asset),
+    func playSound(url: String) {
+        guard let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: url),
               let path = Bundle.main.path(forResource: key, ofType: nil) else {
             return
         }
@@ -118,10 +116,6 @@ class CameraViewController: UIViewController {
 
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
-            //infinite loop
-            if loop == true {
-                audioPlayer?.numberOfLoops =  -1
-            }
             audioPlayer?.play()
         } catch let error {
             print(error.localizedDescription)

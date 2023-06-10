@@ -27,5 +27,5 @@ class Duet {
 
   Future<String?> pauseAudio() => DuetPlatform.instance.pauseAudio();
 
-  Future<String?> playSound(Map args) => DuetPlatform.instance.playSound(args);
+  Future<String?> playSound(String url) => DuetPlatform.instance.playSound(url);
 }

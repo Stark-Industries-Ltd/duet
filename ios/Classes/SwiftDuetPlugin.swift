@@ -41,9 +41,7 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
         case DuetType.pauseAudio.rawValue:
             FLNativeView.controller?.pauseRecordingAudio()
         case DuetType.playSound.rawValue:
-            if let arguments = call.arguments as? [String: AnyObject] {
-                FLNativeView.controller?.playSound(args: arguments)
-            }
+            FLNativeView.controller?.playSound(url: (call.arguments as? String) ?? "")
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }

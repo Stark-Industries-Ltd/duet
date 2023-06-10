@@ -55,7 +55,6 @@ class MethodChannelDuet extends DuetPlatform {
     return result;
   }
 
-  @override
   Future<String?> resetDuet() {
     final result = methodChannel.invokeMethod<String>(DuetConst.resetDuet);
     return result;
@@ -73,28 +72,24 @@ class MethodChannelDuet extends DuetPlatform {
     return result;
   }
 
-  @override
   Future<String?> startCamera() {
     final result = methodChannel.invokeMethod<String>(DuetConst.startCamera);
     return result;
   }
 
-  @override
   Future<String?> stopCamera() {
     final result = methodChannel.invokeMethod<String>(DuetConst.stopCamera);
     return result;
   }
 
-  @override
   Future<String?> resetCamera() {
     final result = methodChannel.invokeMethod<String>(DuetConst.resetCamera);
     return result;
   }
 
   @override
-  Future<String?> playSound(Map args) {
-    final result =
-        methodChannel.invokeMethod<String>(DuetConst.playSound, args);
+  Future<String?> playSound(String url) {
+    final result = methodChannel.invokeMethod<String>(DuetConst.playSound, url);
     return result;
   }
 }

@@ -82,7 +82,7 @@ class _CameraViewState extends State<CameraView> {
     );
 
     Future.delayed(const Duration(seconds: 1), () {
-      _duetPlugin.playSound({'url': 'assets/duet_start.m4a'});
+      _duetPlugin.playSound('assets/duet_start.m4a');
     });
   }
 
@@ -131,14 +131,10 @@ class _CameraViewState extends State<CameraView> {
         children: [
           ElevatedButton(
             onPressed: () {
-              _duetPlugin.playSound({'url': 'assets/duet_321go.m4a'});
+              _duetPlugin.playSound('assets/duet_321go.m4a');
 
               Future.delayed(const Duration(seconds: 4), () {
                 _duetPlugin.recordDuet();
-                _duetPlugin.playSound({
-                  'url': 'assets/duet_soundtrack.m4a',
-                  'loop': true,
-                });
               });
             },
             child: const Text('Record'),
@@ -179,9 +175,7 @@ class _PlayVideosScreenState extends State<PlayVideosScreen> {
   void initState() {
     super.initState();
     try {
-      print(widget.recordFilePath);
       controller1 = VideoPlayerController.network(url);
-      // controller2 = VideoPlayerController.asset('example.assets/3.mp4');
       controller2 = VideoPlayerController.file(File(widget.recordFilePath));
       controller1.initialize().then((value) {
         // controller1.setVolume(1);
