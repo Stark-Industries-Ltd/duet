@@ -8,6 +8,7 @@
 import UIKit
 import AVFoundation
 import Photos
+import MediaPlayer
 
 class CameraViewController: UIViewController {
 
@@ -32,6 +33,10 @@ class CameraViewController: UIViewController {
         cameraView = CameraEngine()
         configVideo()
         loadImageBackground()
+
+        //Update system volume
+        MPVolumeView.setVolume(0.5)
+
     }
 
     private func loadImageBackground() {
@@ -54,6 +59,7 @@ class CameraViewController: UIViewController {
         videoUrl = url
 
         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
+        self.player?.volume = 0.3
 
         let interval = CMTime(value: 1, timescale: 2)
 
@@ -76,6 +82,7 @@ class CameraViewController: UIViewController {
         AudioRecorderManager.shared.initAudio()
 
         let playerLayer = AVPlayerLayer(player: player)
+
         let width = UIScreen.main.bounds.width / 2
         let height = width * asset.ratio
 
@@ -116,7 +123,10 @@ class CameraViewController: UIViewController {
 
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.play()
+            audioPlayer?.volume = 0.5
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+                self.audioPlayer?.play()
+            }
         } catch let error {
             print(error.localizedDescription)
         }
@@ -188,5 +198,16 @@ extension CameraViewController: CVRecorderDelegate {
 
     func didChangedRecorderState(_ currentRecorderState:  RecorderState) {
         print("<<<<<< changed state -- \(currentRecorderState)")
+    }
+}
+//Update system volume
+extension MPVolumeView {
+    static func setVolume(_ volume: Float) {
+        let volumeView = MPVolumeView()
+        let slider = volumeView.subviews.first(where: { $0 is UISlider }) as? UISlider
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+            slider?.value = volume
+        }
     }
 }
