@@ -1,6 +1,6 @@
+import 'package:duet/duet_method_channel.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:duet/duet_method_channel.dart';
 
 void main() {
   MethodChannelDuet platform = MethodChannelDuet();
@@ -19,6 +19,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await platform.getPlatformVersion(), '42');
+    expect(await platform.recordDuet(), 'true');
   });
 }

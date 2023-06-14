@@ -8,34 +8,35 @@
 import Foundation
 import AVFoundation
 import AVKit
+import Photos
 
 extension URL {
 
-    func extractAudioFromVideo(audioURL: URL, completion: @escaping (URL?, Error?) -> Void) {
-        let asset = AVURLAsset(url: self)
-        guard let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetPassthrough) else {
-            completion(nil, NSError(domain: "com.example.extractaudio", code: -1, userInfo: nil))
-            return
-        }
-        exporter.shouldOptimizeForNetworkUse = true
-        exporter.outputFileType = .m4a
-        exporter.outputURL = audioURL
-        let audioRange = CMTimeRange(start: .zero, duration: asset.duration)
-        exporter.timeRange = audioRange
-        exporter.exportAsynchronously {
-            switch exporter.status {
-            case .completed:
-                completion(audioURL, nil)
+    func gridMergeVideos(urlVideo: URL, cGSize: CGSize) {
+        DPVideoMerger().gridMergeVideos(
+            withFileURLs: [urlVideo, self],
+            videoResolution: cGSize,
+            completion: { mergedVideoFile, error in
+                guard let mergedVideoFile = mergedVideoFile else {
+                    return
+                }
+                SwiftDuetPlugin.notifyFlutter(event: .VIDEO_MERGED, arguments: mergedVideoFile.path)
+            }
+        )
+    }
 
-            case .failed, .cancelled:
-                completion(nil, exporter.error)
-            default:
-                completion(nil, NSError(domain: "com.example.extractaudio", code: -1, userInfo: nil))
+    func saveVideoToAlbum() {
+        let info = ""
+        PHPhotoLibrary.shared().performChanges({
+            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: self)
+        }) { (success, error) in
+            if success {
+                print(info)
             }
         }
     }
 
-    static var documents: URL {
+       static var documents: URL {
         return FileManager
             .default
             .urls(for: .documentDirectory, in: .userDomainMask)[0]
