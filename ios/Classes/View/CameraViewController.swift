@@ -131,6 +131,10 @@ class CameraViewController: UIViewController {
             print(error.localizedDescription)
         }
     }
+
+    func saveVideoToAlbum(path: String) {
+        URL(fileURLWithPath: path).saveVideoToAlbum()
+    }
 }
 
 extension CameraViewController {
