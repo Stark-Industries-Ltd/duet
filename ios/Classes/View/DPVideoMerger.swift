@@ -261,7 +261,7 @@ extension DPVideoMerger : VideoMerger {
         }
 
         let composition = AVMutableComposition()
-        var maxTime = maxTimeFromVideos(videoFileURLs)
+        var maxTime = minTimeFromVideos(videoFileURLs)
         var highestFrameRate = 0
 
         if (videoDuration != -1) {
@@ -431,6 +431,15 @@ fileprivate extension DPVideoMerger {
         return (.pi * degree / 180.0)
     }
 
+    func minTimeFromVideos(_ videoFileURLs : [URL]) -> CMTime {
+        let maxTime = AVURLAsset(url: videoFileURLs[0], options: nil).duration
+        guard let minTime = videoFileURLs.map({ AVURLAsset(url: $0, options: DPVideoMerger.AVURLAssetOptions).duration }).min() else {
+            return maxTime
+        }
+
+        return CMTime(value: CMTimeValue(minTime.seconds), timescale: 1)
+    }
+
     func maxTimeFromVideos(_ videoFileURLs : [URL]) -> CMTime {
         var maxTime = AVURLAsset(url: videoFileURLs[0], options: nil).duration
         for  videoFileURL in videoFileURLs {
@@ -441,7 +450,7 @@ fileprivate extension DPVideoMerger {
         }
         return maxTime
     }
-    
+
     func videoAssetOrientation(_ videoAsset: AVAssetTrack) -> UIImage.Orientation {
         let videoTransform: CGAffineTransform = videoAsset.preferredTransform
         var videoAssetOrientation_: UIImage.Orientation = .up

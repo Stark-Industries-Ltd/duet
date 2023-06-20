@@ -92,6 +92,13 @@ class MethodChannelDuet extends DuetPlatform {
     final result = methodChannel.invokeMethod<String>(DuetConst.playSound, url);
     return result;
   }
+
+  @override
+  Future<String?> saveVideoToAlbum(String path) {
+    final result =
+        methodChannel.invokeMethod<String>(DuetConst.saveVideoToAlbum, path);
+    return result;
+  }
 }
 
 class DuetConst {
@@ -105,6 +112,7 @@ class DuetConst {
   static const String stopCamera = 'STOP_CAMERA';
   static const String resetCamera = 'RESET_CAMERA';
   static const String playSound = 'PLAY_SOUND';
+  static const String saveVideoToAlbum = 'SAVE_VIDEO_TO_ALBUM';
 
   // Native call
   static const String audioResult = 'AUDIO_RESULT';

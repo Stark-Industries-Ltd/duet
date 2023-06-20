@@ -41,4 +41,6 @@ abstract class DuetPlatform extends PlatformInterface {
   Future<String?> pauseAudio();
 
   Future<String?> playSound(String url);
+
+  Future<String?> saveVideoToAlbum(String path);
 }
