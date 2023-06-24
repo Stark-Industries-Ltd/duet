@@ -88,16 +88,13 @@ class MethodChannelDuet extends DuetPlatform {
   }
 
   @override
-  Future<String?> playSound(String url) {
-    final result = methodChannel.invokeMethod<String>(DuetConst.playSound, url);
-    return result;
+  Future<bool?> playSound(String url) {
+    return methodChannel.invokeMethod<bool>(DuetConst.playSound, url);
   }
 
   @override
-  Future<String?> saveVideoToAlbum(String path) {
-    final result =
-        methodChannel.invokeMethod<String>(DuetConst.saveVideoToAlbum, path);
-    return result;
+  Future<bool?> saveVideoToAlbum(String path) {
+    return methodChannel.invokeMethod<bool>(DuetConst.saveVideoToAlbum, path);
   }
 }
 
