@@ -60,11 +60,15 @@ class FLNativeView: NSObject, FlutterPlatformView {
 struct DuetViewArgs {
 
     var urlVideo: URL?
-    var image: String?
+    var image: String
+    var lessonId: Int
+    var userId: Int
 
     init(data: [String: Any]) {
         let _url = (data["url"] as? String) ?? ""
         self.urlVideo = _url.starts(with: "http") ? URL(string: _url) : URL(fileURLWithPath: _url)
         self.image = (data["image"] as? String) ?? ""
+        self.lessonId = (data["lesson_id"] as? Int) ?? 0
+        self.userId = (data["user_id"] as? Int) ?? 0
     }
 }

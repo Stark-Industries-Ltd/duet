@@ -29,7 +29,6 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         print(call.method)
-
         switch(call.method){
         case DuetType.recordDuet.rawValue:
             FLNativeView.controller?.startRecording()

@@ -11,9 +11,35 @@ import AVKit
 
 
 @objc protocol VideoMerger {
-    func mergeVideos(withFileURLs videoFileURLs: [URL], videoResolution:CGSize, videoQuality:String, completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
-    func gridMergeVideos(withFileURLs videoFileURLs: [URL], matrix: DPVideoMatrix, audioFileURL: URL?, videoResolution: CGSize, isRepeatVideo: Bool, isRepeatAudio: Bool, isAudio: Bool,videoDuration: Int, videoQuality: String, completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
-    func parallelMergeVideos(withFileURLs videoFileURLs: [URL], audioFileURL: URL?, videoResolution: CGSize, isRepeatVideo: Bool, isRepeatAudio: Bool, videoDuration: Int, videoQuality: String, alignment: ParallelMergeAlignment, completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
+    func mergeVideos(withFileURLs videoFileURLs: [URL],
+                     videoResolution: CGSize,
+                     videoQuality: String,
+                     lessonId: Int,
+                     userId: Int,
+                     completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
+
+    func gridMergeVideos(withFileURLs videoFileURLs: [URL],
+                         matrix: DPVideoMatrix,
+                         audioFileURL: URL?,
+                         videoResolution: CGSize,
+                         isRepeatVideo: Bool,
+                         isRepeatAudio: Bool,
+                         isAudio: Bool,
+                         videoDuration: Int,
+                         videoQuality: String,
+                         lessonId: Int,
+                         userId: Int,
+                         completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
+
+    func parallelMergeVideos(withFileURLs videoFileURLs: [URL],
+                             audioFileURL: URL?,
+                             videoResolution: CGSize,
+                             isRepeatVideo: Bool,
+                             isRepeatAudio: Bool,
+                             videoDuration: Int,
+                             videoQuality: String,
+                             alignment: ParallelMergeAlignment,
+                             completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
 }
 
 @objc public enum ParallelMergeAlignment : Int {
@@ -55,10 +81,11 @@ extension DPVideoMerger : VideoMerger {
     ///   - completion: Completion give  2 optional  values, 1)mergedVideoURL: URL path of successfully merged video   2)error: Gives Error object if some error occur in videos merging process
     ///   - mergedVideoURL: URL path of successfully merged video
     ///   - error: Gives Error object if some error occur in videos merging process
-    open func mergeVideos(withFileURLs
-                          videoFileURLs: [URL],
-                          videoResolution:CGSize = CGSize(width: -1, height: -1),
-                          videoQuality:String = AVAssetExportPresetMediumQuality,
+    open func mergeVideos(withFileURLs videoFileURLs: [URL],
+                          videoResolution: CGSize = CGSize(width: -1, height: -1),
+                          videoQuality: String = AVAssetExportPresetMediumQuality,
+                          lessonId: Int = 0,
+                          userId: Int = 0,
                           completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
         if videoFileURLs.count <= 1 {
             DispatchQueue.main.async { completion(nil, self.videoMoreThenOneError()) }
@@ -211,8 +238,14 @@ extension DPVideoMerger : VideoMerger {
             }
         }
         if isError == false {
-            print("HAU1")
-            exportMergedVideo(instructions, highestFrameRate, videoSize, composition, videoQuality, completion)
+            exportMergedVideo(instructions,
+                              highestFrameRate,
+                              videoSize,
+                              composition,
+                              videoQuality,
+                              lessonId,
+                              userId,
+                              completion)
         }
     }
     
@@ -240,6 +273,8 @@ extension DPVideoMerger : VideoMerger {
                               isAudio: Bool = true,
                               videoDuration: Int = -1,
                               videoQuality: String = AVAssetExportPresetHighestQuality,
+                              lessonId: Int = 0,
+                              userId: Int = 0,
                               completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
         if videoFileURLs.count <= 1 {
             DispatchQueue.main.async { completion(nil, self.videoMoreThenOneError()) }
@@ -378,7 +413,14 @@ extension DPVideoMerger : VideoMerger {
         }
         instruction.layerInstructions = arrAVMutableVideoCompositionLayerInstruction.reversed()
 
-        exportMergedVideo([instruction], highestFrameRate, videoResolution, composition, videoQuality, completion)
+        exportMergedVideo([instruction],
+                          highestFrameRate,
+                          videoResolution,
+                          composition,
+                          videoQuality,
+                          lessonId,
+                          userId,
+                          completion)
 
     }
 
@@ -421,10 +463,11 @@ extension DPVideoMerger : VideoMerger {
 // MARK:-  Private Functions
 fileprivate extension DPVideoMerger {
     
-    func generateMergedVideoFilePath() -> String {
+    func generateMergedVideoFilePath(lessonId: Int = 0,
+                                     userId: Int = 0) -> String {
         let domainMask = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         let url = URL(fileURLWithPath: (domainMask.last?.path)!)
-        return url.appendingPathComponent("\(UUID().uuidString)-mergedVideo.mp4").path
+        return url.appendingPathComponent("\(lessonId)-\(userId)-\(UUID().uuidString).mp4").path
     }
 
     func degreeToRadian(_ degree: CGFloat) -> CGFloat {
@@ -552,7 +595,14 @@ fileprivate extension DPVideoMerger {
     }
 
     
-    func exportMergedVideo(_ instructions: [AVVideoCompositionInstructionProtocol], _ highestFrameRate: Int, _ videoResolution: CGSize, _ composition: AVMutableComposition, _ videoQuality: String, _ completion: @escaping (URL?, Error?) -> Void) {
+    func exportMergedVideo(_ instructions: [AVVideoCompositionInstructionProtocol],
+                           _ highestFrameRate: Int,
+                           _ videoResolution: CGSize,
+                           _ composition: AVMutableComposition,
+                           _ videoQuality: String,
+                           _ lessonId: Int = 0,
+                           _ userId: Int = 0,
+                           _ completion: @escaping (URL?, Error?) -> Void) {
         let mainComposition = AVMutableVideoComposition()
         mainComposition.instructions = instructions
         mainComposition.frameDuration = CMTimeMake(value: 1, timescale: Int32(highestFrameRate))
