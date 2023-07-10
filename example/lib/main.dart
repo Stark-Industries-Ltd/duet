@@ -116,7 +116,15 @@ class _CameraViewState extends State<CameraView> {
               )
             : Stack(
                 children: [
-                  DuetView(args: DuetViewArgs(url: url)),
+                  DuetView(
+                    args: DuetViewArgs(
+                        url: url,
+                        userName: '',
+                        userId: 0,
+                        image: '',
+                        lessonId: 0,
+                        classId: 0),
+                  ),
                   _buildButton(context),
                 ],
               ),
