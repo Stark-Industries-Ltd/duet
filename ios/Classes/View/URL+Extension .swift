@@ -12,9 +12,12 @@ import Photos
 
 extension URL {
 
-    func gridMergeVideos(urlVideo: URL, cGSize: CGSize) {
+    func gridMergeVideos(duetViewArgs: DuetViewArgs,
+                         urlVideo: URL,
+                         cGSize: CGSize) {
         DPVideoMerger().gridMergeVideos(
-            withFileURLs: [urlVideo, self],
+            duetViewArgs: duetViewArgs,
+            videoFileURLs: [urlVideo, self],
             videoResolution: cGSize,
             completion: { mergedVideoFile, error in
                 guard let mergedVideoFile = mergedVideoFile else {

@@ -1,4 +1,5 @@
 import Flutter
+import AVFoundation
 import UIKit
 
 @available(iOS 10.0, *)
@@ -11,8 +12,8 @@ class FLNativeViewFactory: NSObject, FlutterPlatformViewFactory {
     }
     
     public func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
-              return FlutterStandardMessageCodec.sharedInstance()
-        }
+        return FlutterStandardMessageCodec.sharedInstance()
+    }
 
     func create(
         withFrame frame: CGRect,
@@ -39,10 +40,14 @@ class FLNativeView: NSObject, FlutterPlatformView {
         binaryMessenger messenger: FlutterBinaryMessenger?
     ) {
         var viewArgs: DuetViewArgs?
-        if let data = args as? [String: Any] {
-            viewArgs = DuetViewArgs(data: data)
+        let arguments = args as? [String: Any]
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: arguments ?? [:], options: [])
+            viewArgs = try JSONDecoder().decode(DuetViewArgs.self, from: jsonData)
+        } catch {
+            print(error)
         }
-        
+
         let storyboard = UIStoryboard.init(name: "Camera", bundle: Bundle.init(for: CameraViewController.self))
         let controller = storyboard.instantiateViewController(withIdentifier: "CameraID") as! CameraViewController
         
@@ -57,14 +62,38 @@ class FLNativeView: NSObject, FlutterPlatformView {
     }
 }
 
-struct DuetViewArgs {
+struct DuetViewArgs: Codable {
+    var url: String
+    var image: String
+    var userName: String
+    var userId: Int
+    var classId: Int
+    var lessonId: Int
 
-    var urlVideo: URL?
-    var image: String?
+    private enum CodingKeys : String, CodingKey {
+        case url = "url"
+        case image = "image"
+        case userName = "user_name"
+        case userId = "user_id"
+        case classId = "class_id"
+        case lessonId = "lesson_id"
+    }
 
-    init(data: [String: Any]) {
-        let _url = (data["url"] as? String) ?? ""
-        self.urlVideo = _url.starts(with: "http") ? URL(string: _url) : URL(fileURLWithPath: _url)
-        self.image = (data["image"] as? String) ?? ""
+    init(url: String,
+         image: String,
+         userName: String,
+         userId: Int,
+         classId: Int,
+         lessonId: Int) {
+        self.url = url
+        self.image = image
+        self.userName = userName
+        self.userId = userId
+        self.classId = classId
+        self.lessonId = lessonId
+    }
+
+    var urlVideo: URL? {
+        return url.starts(with: "http") ? URL(string: url) : URL(fileURLWithPath: url)
     }
 }

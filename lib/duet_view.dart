@@ -8,7 +8,7 @@ class DuetView extends StatelessWidget {
 
   const DuetView({
     Key? key,
-    this.args = const DuetViewArgs(),
+    required this.args,
   }) : super(key: key);
 
   @override
@@ -33,15 +33,30 @@ class DuetView extends StatelessWidget {
 }
 
 class DuetViewArgs {
-  final String? url;
-  final String? image;
+  final String url;
+  final String image;
+  final int userId;
+  final String userName;
+  final int classId;
+  final int lessonId;
 
-  const DuetViewArgs({this.url, this.image});
+  const DuetViewArgs({
+    required this.url,
+    required this.image,
+    required this.userName,
+    required this.userId,
+    required this.classId,
+    required this.lessonId,
+  });
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'url': url,
       'image': image,
+      'user_id': userId,
+      'user_name': userName,
+      'class_id': classId,
+      'lesson_id': lessonId,
     };
   }
 }

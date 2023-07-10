@@ -8,12 +8,35 @@
 import UIKit
 import AVKit
 
+protocol VideoMerger {
+    func mergeVideos(duetViewArgs: DuetViewArgs,
+                     videoFileURLs: [URL],
+                     videoResolution: CGSize,
+                     videoQuality: String,
+                     completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
 
+    func gridMergeVideos(duetViewArgs: DuetViewArgs,
+                         videoFileURLs: [URL],
+                         matrix: DPVideoMatrix,
+                         audioFileURL: URL?,
+                         videoResolution: CGSize,
+                         isRepeatVideo: Bool,
+                         isRepeatAudio: Bool,
+                         isAudio: Bool,
+                         videoDuration: Int,
+                         videoQuality: String,
+                         completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
 
-@objc protocol VideoMerger {
-    func mergeVideos(withFileURLs videoFileURLs: [URL], videoResolution:CGSize, videoQuality:String, completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
-    func gridMergeVideos(withFileURLs videoFileURLs: [URL], matrix: DPVideoMatrix, audioFileURL: URL?, videoResolution: CGSize, isRepeatVideo: Bool, isRepeatAudio: Bool, isAudio: Bool,videoDuration: Int, videoQuality: String, completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
-    func parallelMergeVideos(withFileURLs videoFileURLs: [URL], audioFileURL: URL?, videoResolution: CGSize, isRepeatVideo: Bool, isRepeatAudio: Bool, videoDuration: Int, videoQuality: String, alignment: ParallelMergeAlignment, completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
+    func parallelMergeVideos(duetViewArgs: DuetViewArgs,
+                             videoFileURLs: [URL],
+                             audioFileURL: URL?,
+                             videoResolution: CGSize,
+                             isRepeatVideo: Bool,
+                             isRepeatAudio: Bool,
+                             videoDuration: Int,
+                             videoQuality: String,
+                             alignment: ParallelMergeAlignment,
+                             completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void)
 }
 
 @objc public enum ParallelMergeAlignment : Int {
@@ -55,11 +78,11 @@ extension DPVideoMerger : VideoMerger {
     ///   - completion: Completion give  2 optional  values, 1)mergedVideoURL: URL path of successfully merged video   2)error: Gives Error object if some error occur in videos merging process
     ///   - mergedVideoURL: URL path of successfully merged video
     ///   - error: Gives Error object if some error occur in videos merging process
-    open func mergeVideos(withFileURLs
-                          videoFileURLs: [URL],
-                          videoResolution:CGSize = CGSize(width: -1, height: -1),
-                          videoQuality:String = AVAssetExportPresetMediumQuality,
-                          completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
+    func mergeVideos(duetViewArgs: DuetViewArgs,
+                     videoFileURLs: [URL],
+                     videoResolution: CGSize = CGSize(width: -1, height: -1),
+                     videoQuality: String = AVAssetExportPresetMediumQuality,
+                     completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
         if videoFileURLs.count <= 1 {
             DispatchQueue.main.async { completion(nil, self.videoMoreThenOneError()) }
             return
@@ -211,8 +234,13 @@ extension DPVideoMerger : VideoMerger {
             }
         }
         if isError == false {
-            print("HAU1")
-            exportMergedVideo(instructions, highestFrameRate, videoSize, composition, videoQuality, completion)
+            exportMergedVideo(duetViewArgs,
+                              instructions,
+                              highestFrameRate,
+                              videoSize,
+                              composition,
+                              videoQuality,
+                              completion)
         }
     }
     
@@ -230,17 +258,18 @@ extension DPVideoMerger : VideoMerger {
     ///   - completion: completion give  2 optional  values, 1)mergedVideoURL: URL path of successfully grid merged video  2)error: gives Error object if some error occur in videos merging process
     ///   - mergedVideoURL: URL path of successfully grid merged video
     ///   - error: gives Error object if some error occur in videos merging process
-    open func gridMergeVideos(withFileURLs
-                              videoFileURLs: [URL],
-                              matrix: DPVideoMatrix = DPVideoMatrix(rows: 1, columns: 2),
-                              audioFileURL: URL? = nil,
-                              videoResolution: CGSize,
-                              isRepeatVideo: Bool = false,
-                              isRepeatAudio: Bool = false,
-                              isAudio: Bool = true,
-                              videoDuration: Int = -1,
-                              videoQuality: String = AVAssetExportPresetHighestQuality,
-                              completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
+
+    func gridMergeVideos(duetViewArgs: DuetViewArgs,
+                         videoFileURLs: [URL],
+                         matrix: DPVideoMatrix = DPVideoMatrix(rows: 1, columns: 2),
+                         audioFileURL: URL? = nil,
+                         videoResolution: CGSize,
+                         isRepeatVideo: Bool = false,
+                         isRepeatAudio: Bool = false,
+                         isAudio: Bool = true,
+                         videoDuration: Int = -1,
+                         videoQuality: String = AVAssetExportPresetHighestQuality,
+                         completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
         if videoFileURLs.count <= 1 {
             DispatchQueue.main.async { completion(nil, self.videoMoreThenOneError()) }
             return
@@ -373,12 +402,16 @@ extension DPVideoMerger : VideoMerger {
                 videoFileURLs.forEach { (audioFileURL) in
                     addAudioToMergedVideo(audioFileURL, composition, isRepeatAudio, maxTime, completion)
                 }
-//                addAudioToMergedVideo(videoFileURLs.last, composition, isRepeatAudio, maxTime, completion)
             }
         }
         instruction.layerInstructions = arrAVMutableVideoCompositionLayerInstruction.reversed()
-
-        exportMergedVideo([instruction], highestFrameRate, videoResolution, composition, videoQuality, completion)
+        exportMergedVideo(duetViewArgs,
+                          [instruction],
+                          highestFrameRate,
+                          videoResolution,
+                          composition,
+                          videoQuality,
+                          completion)
 
     }
 
@@ -396,16 +429,16 @@ extension DPVideoMerger : VideoMerger {
     ///   - mergedVideoURL: URL path of successfully parallel merged video
     ///   - error: gives Error object if some error occur in videos merging process
     @available(*, deprecated, message: "Use grid merge using matrix")
-    open func parallelMergeVideos(withFileURLs
-                                  videoFileURLs: [URL],
-                                  audioFileURL: URL? = nil,
-                                  videoResolution: CGSize,
-                                  isRepeatVideo: Bool = false,
-                                  isRepeatAudio: Bool = false,
-                                  videoDuration: Int = -1,
-                                  videoQuality: String = AVAssetExportPresetHighestQuality,
-                                  alignment: ParallelMergeAlignment = .vertical,
-                                  completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
+    func parallelMergeVideos(duetViewArgs: DuetViewArgs,
+                             videoFileURLs: [URL],
+                             audioFileURL: URL? = nil,
+                             videoResolution: CGSize,
+                             isRepeatVideo: Bool = false,
+                             isRepeatAudio: Bool = false,
+                             videoDuration: Int = -1,
+                             videoQuality: String = AVAssetExportPresetHighestQuality,
+                             alignment: ParallelMergeAlignment = .vertical,
+                             completion: @escaping (_ mergedVideoURL: URL?, _ error: Error?) -> Void) {
         
         var matrix: DPVideoMatrix!
         if alignment == .vertical {
@@ -413,18 +446,28 @@ extension DPVideoMerger : VideoMerger {
         } else {
             matrix = DPVideoMatrix(rows: UInt(videoFileURLs.count), columns: 1)
         }
-        gridMergeVideos(withFileURLs: videoFileURLs, matrix: matrix, audioFileURL: audioFileURL, videoResolution: videoResolution, isRepeatVideo: isRepeatVideo, isRepeatAudio: isRepeatAudio, isAudio: true, videoDuration: videoDuration, videoQuality: videoQuality, completion: completion)
+        gridMergeVideos(duetViewArgs: duetViewArgs,
+                        videoFileURLs: videoFileURLs,
+                        matrix: matrix,
+                        audioFileURL: audioFileURL,
+                        videoResolution: videoResolution,
+                        isRepeatVideo: isRepeatVideo,
+                        isRepeatAudio: isRepeatAudio,
+                        isAudio: true,
+                        videoDuration: videoDuration,
+                        videoQuality: videoQuality,
+                        completion: completion)
     }
 
 }
 
 // MARK:-  Private Functions
 fileprivate extension DPVideoMerger {
-    
-    func generateMergedVideoFilePath() -> String {
+    func generateMergedVideoFilePath(args: DuetViewArgs) -> String {
         let domainMask = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         let url = URL(fileURLWithPath: (domainMask.last?.path)!)
-        return url.appendingPathComponent("\(UUID().uuidString)-mergedVideo.mp4").path
+        let pathName = "\(args.userName)_UID-\(args.userId)_CID-\(args.classId)_LID-\(args.lessonId)"
+        return url.appendingPathComponent("\(pathName)_\(UUID().uuidString).mp4").path
     }
 
     func degreeToRadian(_ degree: CGFloat) -> CGFloat {
@@ -551,14 +594,19 @@ fileprivate extension DPVideoMerger {
         }
     }
 
-    
-    func exportMergedVideo(_ instructions: [AVVideoCompositionInstructionProtocol], _ highestFrameRate: Int, _ videoResolution: CGSize, _ composition: AVMutableComposition, _ videoQuality: String, _ completion: @escaping (URL?, Error?) -> Void) {
+    func exportMergedVideo(_ duetViewArgs: DuetViewArgs,
+                           _ instructions: [AVVideoCompositionInstructionProtocol],
+                           _ highestFrameRate: Int,
+                           _ videoResolution: CGSize,
+                           _ composition: AVMutableComposition,
+                           _ videoQuality: String,
+                           _ completion: @escaping (URL?, Error?) -> Void) {
         let mainComposition = AVMutableVideoComposition()
         mainComposition.instructions = instructions
         mainComposition.frameDuration = CMTimeMake(value: 1, timescale: Int32(highestFrameRate))
         mainComposition.renderSize = videoResolution
         
-        let url = URL(fileURLWithPath: generateMergedVideoFilePath())
+        let url = URL(fileURLWithPath: generateMergedVideoFilePath(args: duetViewArgs))
         
         DPVideoMerger.exporter = AVAssetExportSession(asset: composition, presetName: videoQuality)
         DPVideoMerger.exporter?.outputURL = url

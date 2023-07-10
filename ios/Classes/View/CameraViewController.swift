@@ -179,8 +179,8 @@ extension CameraViewController {
     }
 
     private func mergeVideos(cameraRecordUrl: URL) {
-        guard let videoUrl = videoUrl else { return }
-        cameraRecordUrl.gridMergeVideos(urlVideo: videoUrl,
+        guard let videoUrl = videoUrl, let duetViewArgs = viewArgs else { return }
+        cameraRecordUrl.gridMergeVideos(duetViewArgs: duetViewArgs, urlVideo: videoUrl,
                                         cGSize: CGSize(width: 810, height: 720)
         )
     }
