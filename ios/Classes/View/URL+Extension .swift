@@ -28,14 +28,11 @@ extension URL {
         )
     }
 
-    func saveVideoToAlbum() {
-        let info = ""
+    func saveVideoToAlbum(result: @escaping FlutterResult) {
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: self)
-        }) { (success, error) in
-            if success {
-                print(info)
-            }
+        }) { (success, _) in
+            result(success)
         }
     }
 

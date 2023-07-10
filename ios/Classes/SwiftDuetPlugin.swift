@@ -29,22 +29,28 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         print(call.method)
-
         switch(call.method){
         case DuetType.recordDuet.rawValue:
             FLNativeView.controller?.startRecording()
+            result("")
         case DuetType.pauseDuet.rawValue:
             FLNativeView.controller?.pauseRecording()
+            result("")
         case DuetType.resumeDuet.rawValue:
             FLNativeView.controller?.resumeRecording()
+            result("")
         case DuetType.recordAudio.rawValue:
             FLNativeView.controller?.startRecordingAudio()
+            result("")
         case DuetType.pauseAudio.rawValue:
             FLNativeView.controller?.pauseRecordingAudio()
+            result("")
         case DuetType.playSound.rawValue:
-            FLNativeView.controller?.playSound(url: (call.arguments as? String) ?? "")
+            let url = (call.arguments as? String) ?? ""
+            FLNativeView.controller?.playSound(url: url, result: result)
         case DuetType.saveVideoToAlbum.rawValue:
-            FLNativeView.controller?.saveVideoToAlbum(path: (call.arguments as? String) ?? "")
+            let path = (call.arguments as? String) ?? ""
+            FLNativeView.controller?.saveVideoToAlbum(path: path, result: result)
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }

@@ -27,8 +27,8 @@ class Duet {
 
   Future<String?> pauseAudio() => DuetPlatform.instance.pauseAudio();
 
-  Future<String?> playSound(String url) => DuetPlatform.instance.playSound(url);
+  Future<bool?> playSound(String url) => DuetPlatform.instance.playSound(url);
 
-  Future<String?> saveVideoToAlbum(String path) =>
+  Future<bool?> saveVideoToAlbum(String path) =>
       DuetPlatform.instance.saveVideoToAlbum(path);
 }
