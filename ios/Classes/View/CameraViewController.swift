@@ -114,9 +114,10 @@ class CameraViewController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
 
-    func playSound(url: String) {
+    func playSound(url: String, result: @escaping FlutterResult) {
         guard let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: url),
               let path = Bundle.main.path(forResource: key, ofType: nil) else {
+            result(false)
             return
         }
         let url = URL(fileURLWithPath: path)
@@ -125,15 +126,17 @@ class CameraViewController: UIViewController {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.volume = 0.5
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
+                result(true)
                 self.audioPlayer?.play()
             }
         } catch let error {
+            result(false)
             print(error.localizedDescription)
         }
     }
 
-    func saveVideoToAlbum(path: String) {
-        URL(fileURLWithPath: path).saveVideoToAlbum()
+    func saveVideoToAlbum(path: String, result: @escaping FlutterResult) {
+        URL(fileURLWithPath: path).saveVideoToAlbum(result: result)
     }
 }
 
