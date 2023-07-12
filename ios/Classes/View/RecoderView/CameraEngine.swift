@@ -215,6 +215,7 @@ extension CameraEngine: AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureV
             i+=1
         }
         CMSampleBufferCreateCopyWithNewTiming(allocator: nil, sampleBuffer: sampleBuffer, sampleTimingEntryCount: count, sampleTimingArray: pInfo, sampleBufferOut: &out)
+        pInfo.deallocate()
         return out
     }
 
@@ -230,7 +231,10 @@ extension CameraEngine: AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureV
                               didOutput sampleBuffer: CMSampleBuffer,
                               from connection: AVCaptureConnection) {
         var bVideo = true
-        serialQueue.sync {
+        serialQueue.sync { [weak self] in
+            guard let self = self else {
+                return
+            }
             var sampleBuffer = sampleBuffer
             bVideo = connection == self.videoConnection
             if !self.isCapturing || self.isPaused {
