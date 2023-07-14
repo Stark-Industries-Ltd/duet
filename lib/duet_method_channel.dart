@@ -7,6 +7,7 @@ typedef OnVideoRecorded = Function(String path);
 typedef OnVideoMerged = Function(String path);
 typedef OnAudioReceived = Function(String path);
 typedef OnTimerVideoReceived = Function(String timer);
+typedef OnVideoError = Function(String error);
 
 /// An implementation of [DuetPlatform] that uses method channels.
 class MethodChannelDuet extends DuetPlatform {
@@ -20,6 +21,7 @@ class MethodChannelDuet extends DuetPlatform {
     OnAudioReceived? onAudioReceived,
     OnVideoMerged? onVideoMerged,
     OnTimerVideoReceived? onTimerVideoReceived,
+    OnVideoError? onVideoError,
   }) async {
     methodChannel.setMethodCallHandler((call) {
       switch (call.method) {
@@ -31,6 +33,8 @@ class MethodChannelDuet extends DuetPlatform {
           return onVideoMerged?.call(call.arguments);
         case DuetConst.videoTimer:
           return onTimerVideoReceived?.call(call.arguments);
+        case DuetConst.videoError:
+          return onVideoError?.call(call.arguments);
         default:
           return Future(() => null);
       }
@@ -116,4 +120,5 @@ class DuetConst {
   static const String videoRecorded = 'VIDEO_RECORDED';
   static const String videoMerged = 'VIDEO_MERGED';
   static const String videoTimer = 'VIDEO_TIMER';
+  static const String videoError = 'VIDEO_ERROR';
 }
