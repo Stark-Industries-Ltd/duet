@@ -20,6 +20,11 @@ extension URL {
             videoFileURLs: [urlVideo, self],
             videoResolution: cGSize,
             completion: { mergedVideoFile, error in
+
+                if let error = error {
+                    SwiftDuetPlugin.notifyFlutter(event: .VIDEO_ERROR, arguments: "\(error)")
+                }
+
                 guard let mergedVideoFile = mergedVideoFile else {
                     return
                 }

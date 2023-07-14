@@ -8,12 +8,14 @@ class Duet {
     OnAudioReceived? onAudioReceived,
     OnVideoMerged? onVideoMerged,
     OnTimerVideoReceived? onTimerVideoReceived,
+    OnVideoError? onVideoError,
   }) async {
     return DuetPlatform.instance.onNativeCall(
       onAudioReceived: onAudioReceived,
       onVideoMerged: onVideoMerged,
       onVideoRecorded: onVideoRecorded,
       onTimerVideoReceived: onTimerVideoReceived,
+      onVideoError: onVideoError,
     );
   }
 
