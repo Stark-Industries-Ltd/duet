@@ -27,6 +27,7 @@ class CameraViewController: UIViewController {
 
     private lazy var captureStack = CVRecorder(delegate: self)
     private var isObjectDetectionEnabled = false
+    private var timeObserver: Any?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -63,7 +64,7 @@ class CameraViewController: UIViewController {
 
         let interval = CMTime(value: 1, timescale: 2)
 
-        self.player?.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) {[weak self] progressTime in
+        timeObserver = self.player?.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) {[weak self] progressTime in
             guard let self = self else {
                 return
             }
@@ -99,19 +100,20 @@ class CameraViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         cameraView?.startup(cameraPreviewContainer)
+        UIApplication.shared.isIdleTimerDisabled = true
     }
 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
+        UIApplication.shared.isIdleTimerDisabled = false
         audioPlayer = nil
+        if let timeObserver = timeObserver {
+            player?.removeTimeObserver(timeObserver)
+        }
         player = nil
         cameraView?.stopSession()
         cameraView = nil
         AudioRecorderManager.shared.resetAudio()
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
     }
 
     func playSound(url: String, result: @escaping FlutterResult) {
@@ -124,11 +126,8 @@ class CameraViewController: UIViewController {
 
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.volume = 0.5
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
-                result(true)
-                self.audioPlayer?.play()
-            }
+            audioPlayer?.play()
+            result(true)
         } catch let error {
             result(false)
             print(error.localizedDescription)
