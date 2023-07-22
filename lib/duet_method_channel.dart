@@ -100,6 +100,11 @@ class MethodChannelDuet extends DuetPlatform {
   Future<bool?> saveVideoToAlbum(String path) {
     return methodChannel.invokeMethod<bool>(DuetConst.saveVideoToAlbum, path);
   }
+
+  @override
+  Future<bool?> merge(String path) {
+    return methodChannel.invokeMethod<bool>(DuetConst.merge, path);
+  }
 }
 
 class DuetConst {
@@ -114,6 +119,7 @@ class DuetConst {
   static const String resetCamera = 'RESET_CAMERA';
   static const String playSound = 'PLAY_SOUND';
   static const String saveVideoToAlbum = 'SAVE_VIDEO_TO_ALBUM';
+  static const String merge = 'MERGE';
 
   // Native call
   static const String audioResult = 'AUDIO_RESULT';

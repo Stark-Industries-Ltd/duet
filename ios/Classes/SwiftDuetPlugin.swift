@@ -9,6 +9,7 @@ enum DuetType: String {
     case pauseAudio  = "PAUSE_AUDIO"
     case playSound  = "PLAY_SOUND"
     case saveVideoToAlbum = "SAVE_VIDEO_TO_ALBUM"
+    case merge = "MERGE"
 }
 
 @available(iOS 10.0, *)
@@ -51,6 +52,40 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
         case DuetType.saveVideoToAlbum.rawValue:
             let path = (call.arguments as? String) ?? ""
             FLNativeView.controller?.saveVideoToAlbum(path: path, result: result)
+        case DuetType.merge.rawValue:
+            do{
+                let a = (call.arguments as? String)!.split(separator: "|")
+                print(a)
+                let origin = String(a[0])
+                let user = String(a[1])
+                var originUrl: URL? {
+                    return origin.starts(with: "http") ? URL(string: origin) : URL(fileURLWithPath: origin)
+                }
+                var userUrl: URL? {
+                    return user.starts(with: "http") ? URL(string: user) : URL(fileURLWithPath: user)
+                }
+                DPVideoMerger().gridMergeVideos(
+                    duetViewArgs: DuetViewArgs(url: "String",
+                                               image: "String",
+                                               userName: "String",
+                                               userId: 1,
+                                               classId: 1,
+                                               lessonId: 1),
+                    videoFileURLs: [originUrl!, userUrl!],
+                    videoResolution: CGSize(width: 810, height: 720),
+                    completion: { mergedVideoFile, error in
+                        if let error = error {
+                            SwiftDuetPlugin.notifyFlutter(event: .VIDEO_ERROR, arguments: "\(error)")
+                        }
+
+                        guard let mergedVideoFile = mergedVideoFile else {
+                            return
+                        }
+                        SwiftDuetPlugin.notifyFlutter(event: .VIDEO_MERGED, arguments: mergedVideoFile.path)
+                    }
+                )
+            }
+            
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }

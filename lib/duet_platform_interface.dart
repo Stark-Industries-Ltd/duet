@@ -44,4 +44,5 @@ abstract class DuetPlatform extends PlatformInterface {
   Future<bool?> playSound(String url);
 
   Future<bool?> saveVideoToAlbum(String path);
+  Future<bool?> merge(String path);
 }

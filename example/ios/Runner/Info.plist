@@ -51,5 +51,10 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>UISupportsDocumentBrowser</key>
+	<true/><key>LSSupportsOpeningDocumentsInPlace</key>
+           <true/><key>UISupportsDocumentBrowser</key>
+                  <true/><key>NSPhotoLibraryUsageDescription</key>
+                         <string>Explain why your app uses photo library</string>
 </dict>
 </plist>

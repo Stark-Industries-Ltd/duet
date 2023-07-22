@@ -33,4 +33,6 @@ class Duet {
 
   Future<bool?> saveVideoToAlbum(String path) =>
       DuetPlatform.instance.saveVideoToAlbum(path);
+
+  Future<bool?> merge(String path) => DuetPlatform.instance.merge(path);
 }
