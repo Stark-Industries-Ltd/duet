@@ -56,5 +56,7 @@
            <true/><key>UISupportsDocumentBrowser</key>
                   <true/><key>NSPhotoLibraryUsageDescription</key>
                          <string>Explain why your app uses photo library</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 </dict>
 </plist>

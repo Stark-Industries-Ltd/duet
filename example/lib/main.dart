@@ -42,17 +42,23 @@ class MergeView extends StatefulWidget {
 }
 
 class _MergeViewState extends State<MergeView> {
-  final _uidController = TextEditingController()..text = '1136460';
-  final _lidController = TextEditingController()..text = '1459007';
+  final _uidController = TextEditingController()..text = '1167712';
+  final _lidController = TextEditingController()..text = '1468356';
   final _vodPlugin = VODUpload();
-  Duet _duetPlugin = Duet();
+  final Duet _duetPlugin = Duet();
   RxDouble percent = 0.0.obs;
   String status = '';
   String _recordFilePath = '';
   String origin = '';
   String userVideo = '';
   final _vhClient = VuiHocClient(
-    Dio()..interceptors.add(LogInterceptor(request: true, requestBody: true)),
+    Dio()
+      ..interceptors.add(LogInterceptor(
+        request: true,
+        requestBody: false,
+        responseBody: true,
+        logPrint: (v) => log('$v', name: '_MergeViewState'),
+      )),
   );
 
   String get fileName =>
@@ -155,6 +161,7 @@ class _MergeViewState extends State<MergeView> {
                                         total != 0 ? count / total : 0;
                                   },
                                 );
+                                log('${duet?.videoDuet}', name: 'VIDEO DUET');
                                 setState(() => status = 'Duet downloaded');
                                 log(origin, name: '_MergeViewState.build');
                               },
@@ -299,9 +306,12 @@ class _MergeViewState extends State<MergeView> {
         lessonId: lesson.lessonId.toString(),
         token: token,
       );
+      log('', name: '_MergeViewState._getInfo');
       percent.value = 0.8;
 
       final lessonInfo = IeltsLesson.fromJson(lessonData['data']);
+      log('${lessonInfo.skills?.last.listMission?.last.toJson()}',
+          name: '_MergeViewState._getInfo');
       final lessonDuet = lessonInfo.skills?.last.listMission?.first;
       if (lessonDuet?.isDuet != true) return;
 
@@ -318,6 +328,7 @@ class _MergeViewState extends State<MergeView> {
       status = "Load info success";
       setState(() => duet = duetInfo);
 
+      log('${duet?.videoDuet}', name: '_MergeViewState._getInfo');
       percent.value = 1;
     } catch (e, st) {
       log('', name: '_MergeViewState._getInfo', error: e, stackTrace: st);
