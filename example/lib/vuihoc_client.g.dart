@@ -84,6 +84,7 @@ class _VuiHocClient implements VuiHocClient {
   }) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{
       r'app-id': appId,
       r'device-id': deviceId,
@@ -93,6 +94,7 @@ class _VuiHocClient implements VuiHocClient {
       'date_of_birth': birthday,
       'user_id': uid,
     };
+    _data.removeWhere((k, v) => v == null);
     final _result = await _dio.fetch(_setStreamType<dynamic>(Options(
       method: 'POST',
       headers: _headers,
