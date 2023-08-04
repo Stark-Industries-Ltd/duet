@@ -54,7 +54,9 @@ class VideoEncoder {
                 _writer.add(_audioInput)
             }
         } catch (let error) {
-            print("<<<<<<<<<< error obserevd \(error.localizedDescription)")
+            let message = "<<<<<<<<<< error obserevd \(error.localizedDescription)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
             throw error
         }
     }

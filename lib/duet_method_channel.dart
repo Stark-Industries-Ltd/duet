@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -22,8 +24,10 @@ class MethodChannelDuet extends DuetPlatform {
     OnVideoMerged? onVideoMerged,
     OnTimerVideoReceived? onTimerVideoReceived,
     OnVideoError? onVideoError,
+    OnVideoError? onAlert,
   }) async {
     methodChannel.setMethodCallHandler((call) {
+      log(call.method, name: 'DUET_PLUGIN');
       switch (call.method) {
         case DuetConst.videoRecorded:
           return onVideoRecorded?.call(call.arguments);
@@ -35,6 +39,8 @@ class MethodChannelDuet extends DuetPlatform {
           return onTimerVideoReceived?.call(call.arguments);
         case DuetConst.videoError:
           return onVideoError?.call(call.arguments);
+        case DuetConst.alert:
+          return onAlert?.call(call.arguments);
         default:
           return Future(() => null);
       }
@@ -121,4 +127,5 @@ class DuetConst {
   static const String videoMerged = 'VIDEO_MERGED';
   static const String videoTimer = 'VIDEO_TIMER';
   static const String videoError = 'VIDEO_ERROR';
+  static const String alert = 'ALERT';
 }

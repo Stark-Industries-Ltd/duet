@@ -67,4 +67,5 @@ public enum EventType: String {
     case VIDEO_MERGED
     case VIDEO_TIMER
     case VIDEO_ERROR
+    case ALERT
 }

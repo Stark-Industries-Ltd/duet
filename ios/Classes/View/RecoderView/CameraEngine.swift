@@ -107,7 +107,9 @@ class CameraEngine: NSObject {
                 session.startRunning()
             }
         } catch (let error) {
-            print("********** camera engine startup() \(error.localizedDescription)")
+            let message = "********** camera engine startup() \(error.localizedDescription)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
         }
     }
 

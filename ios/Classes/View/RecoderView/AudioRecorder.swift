@@ -30,7 +30,9 @@ class AudioRecorder: NSObject, AVAudioRecorderDelegate {
             let audioFormat = audioEngine.inputNode.outputFormat(forBus: 0)
             audioEngine.connect(audioInput, to: audioEngine.mainMixerNode, format:audioFormat)
         } catch {
-            print("Could not enable voice processing \(error)")
+            let message = "Could not enable voice processing \(error)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
             return
         }
     }
@@ -41,7 +43,9 @@ class AudioRecorder: NSObject, AVAudioRecorderDelegate {
             try session.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
             try session.setActive(true)
         } catch let error {
-            print("<< session \(error)")
+            let message = "<< Set audio session error: \(error)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
         }
     }
 

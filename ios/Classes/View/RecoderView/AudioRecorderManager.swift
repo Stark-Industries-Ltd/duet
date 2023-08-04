@@ -38,7 +38,9 @@ class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
             try session.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
             try session.setActive(true)
         } catch let error {
-            print("<< session \(error)")
+            let message = "AudioRecorderManager session \(error)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
         }
     }
 
@@ -52,7 +54,9 @@ class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
             audioRecorder?.delegate = self
             audioRecorder?.record()
         } catch let error {
-            print("AUDIO RECORDER <<<<< \(error)")
+            let message = "AUDIO RECORDER <<<<< \(error)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
         }
     }
 
