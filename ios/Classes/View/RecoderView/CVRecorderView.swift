@@ -113,7 +113,9 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
             cameraSession.startRunning()
         } catch let error {
             recorderState = .NotReady
-            debugPrint(error.localizedDescription)
+            let message = "CVRecorderView setupCamera \(error.localizedDescription)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
         }
     }
 
@@ -156,7 +158,9 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
             videoWriter.startWriting()
         }
         catch let error {
-            debugPrint(error.localizedDescription)
+            let message = "CVRecorderView setupWriter \(error.localizedDescription)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
         }
     }
 }

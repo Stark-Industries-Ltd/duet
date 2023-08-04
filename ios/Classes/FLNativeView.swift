@@ -45,7 +45,9 @@ class FLNativeView: NSObject, FlutterPlatformView {
             let jsonData = try JSONSerialization.data(withJSONObject: arguments ?? [:], options: [])
             viewArgs = try JSONDecoder().decode(DuetViewArgs.self, from: jsonData)
         } catch {
-            print(error)
+            let message = "FLNativeView init \(error)"
+            print(message)
+            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
         }
 
         let storyboard = UIStoryboard.init(name: "Camera", bundle: Bundle.init(for: CameraViewController.self))
