@@ -9,6 +9,7 @@ class Duet {
     OnVideoMerged? onVideoMerged,
     OnTimerVideoReceived? onTimerVideoReceived,
     OnVideoError? onVideoError,
+    OnWillEnterForeground? onWillEnterForeground,
     OnVideoError? onAlert,
   }) async {
     return DuetPlatform.instance.onNativeCall(
@@ -17,6 +18,7 @@ class Duet {
       onVideoRecorded: onVideoRecorded,
       onTimerVideoReceived: onTimerVideoReceived,
       onVideoError: onVideoError,
+      onWillEnterForeground: onWillEnterForeground,
       onAlert: onAlert,
     );
   }
@@ -33,6 +35,5 @@ class Duet {
 
   Future<bool?> playSound(String url) => DuetPlatform.instance.playSound(url);
 
-  Future<bool?> saveVideoToAlbum(String path) =>
-      DuetPlatform.instance.saveVideoToAlbum(path);
+  Future<bool?> reset() => DuetPlatform.instance.reset();
 }

@@ -28,16 +28,28 @@ class CameraViewController: UIViewController {
     private lazy var captureStack = CVRecorder(delegate: self)
     private var isObjectDetectionEnabled = false
     private var timeObserver: Any?
+    private var observer: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         cameraView = CameraEngine()
-        configVideo()
+        configData()
         loadImageBackground()
 
         //Update system volume
         MPVolumeView.setVolume(0.5)
 
+        observer = NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil, queue: .main) { [unowned self] _ in
+                SwiftDuetPlugin.notifyFlutter(event: .WILL_ENTER_FOREGROUND, arguments: "")
+            }
+    }
+
+    deinit {
+        if let observer = observer {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     private func loadImageBackground() {
@@ -50,7 +62,7 @@ class CameraViewController: UIViewController {
         imageBackground.image = UIImage(contentsOfFile: path)
     }
 
-    private func configVideo() {
+    private func configData() {
         guard let url = viewArgs?.urlVideo else {
             print("load video error")
             return
@@ -60,7 +72,6 @@ class CameraViewController: UIViewController {
         videoUrl = url
 
         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-        self.player?.volume = 0.3
 
         let interval = CMTime(value: 1, timescale: 2)
 
@@ -134,8 +145,16 @@ class CameraViewController: UIViewController {
         }
     }
 
-    func saveVideoToAlbum(path: String, result: @escaping FlutterResult) {
-        URL(fileURLWithPath: path).saveVideoToAlbum(result: result)
+    func resetData(result: @escaping FlutterResult) {
+        //Update system volume
+        MPVolumeView.setVolume(0.5)
+
+        player?.pause()
+        player?.seek(to: CMTime.zero)
+        cameraView?.stopCapturing { _ in}
+        AudioRecorderManager.shared.resetAudio()
+
+        result("")
     }
 }
 

@@ -29,6 +29,7 @@ abstract class DuetPlatform extends PlatformInterface {
     OnVideoMerged? onVideoMerged,
     OnTimerVideoReceived? onTimerVideoReceived,
     OnVideoError? onVideoError,
+    OnWillEnterForeground? onWillEnterForeground,
     OnVideoError? onAlert,
   });
 
@@ -44,5 +45,5 @@ abstract class DuetPlatform extends PlatformInterface {
 
   Future<bool?> playSound(String url);
 
-  Future<bool?> saveVideoToAlbum(String path);
+  Future<bool?> reset();
 }

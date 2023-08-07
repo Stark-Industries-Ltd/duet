@@ -8,7 +8,7 @@ enum DuetType: String {
     case recordAudio = "RECORD_AUDIO"
     case pauseAudio  = "PAUSE_AUDIO"
     case playSound  = "PLAY_SOUND"
-    case saveVideoToAlbum = "SAVE_VIDEO_TO_ALBUM"
+    case reset = "RESET"
 }
 
 @available(iOS 10.0, *)
@@ -48,9 +48,8 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
         case DuetType.playSound.rawValue:
             let url = (call.arguments as? String) ?? ""
             FLNativeView.controller?.playSound(url: url, result: result)
-        case DuetType.saveVideoToAlbum.rawValue:
-            let path = (call.arguments as? String) ?? ""
-            FLNativeView.controller?.saveVideoToAlbum(path: path, result: result)
+        case DuetType.reset.rawValue:
+            FLNativeView.controller?.resetData(result: result)
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
@@ -67,5 +66,6 @@ public enum EventType: String {
     case VIDEO_MERGED
     case VIDEO_TIMER
     case VIDEO_ERROR
+    case WILL_ENTER_FOREGROUND
     case ALERT
 }

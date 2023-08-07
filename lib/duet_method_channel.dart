@@ -10,6 +10,7 @@ typedef OnVideoMerged = Function(String path);
 typedef OnAudioReceived = Function(String path);
 typedef OnTimerVideoReceived = Function(String timer);
 typedef OnVideoError = Function(String error);
+typedef OnWillEnterForeground = Function(String data);
 
 /// An implementation of [DuetPlatform] that uses method channels.
 class MethodChannelDuet extends DuetPlatform {
@@ -24,6 +25,7 @@ class MethodChannelDuet extends DuetPlatform {
     OnVideoMerged? onVideoMerged,
     OnTimerVideoReceived? onTimerVideoReceived,
     OnVideoError? onVideoError,
+    OnWillEnterForeground? onWillEnterForeground,
     OnVideoError? onAlert,
   }) async {
     methodChannel.setMethodCallHandler((call) {
@@ -39,6 +41,8 @@ class MethodChannelDuet extends DuetPlatform {
           return onTimerVideoReceived?.call(call.arguments);
         case DuetConst.videoError:
           return onVideoError?.call(call.arguments);
+        case DuetConst.willEnterForeground:
+          return onWillEnterForeground?.call(call.arguments);
         case DuetConst.alert:
           return onAlert?.call(call.arguments);
         default:
@@ -65,11 +69,6 @@ class MethodChannelDuet extends DuetPlatform {
     return result;
   }
 
-  Future<String?> resetDuet() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.resetDuet);
-    return result;
-  }
-
   @override
   Future<String?> pauseAudio() {
     final result = methodChannel.invokeMethod<String>(DuetConst.pauseAudio);
@@ -82,29 +81,14 @@ class MethodChannelDuet extends DuetPlatform {
     return result;
   }
 
-  Future<String?> startCamera() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.startCamera);
-    return result;
-  }
-
-  Future<String?> stopCamera() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.stopCamera);
-    return result;
-  }
-
-  Future<String?> resetCamera() {
-    final result = methodChannel.invokeMethod<String>(DuetConst.resetCamera);
-    return result;
-  }
-
   @override
   Future<bool?> playSound(String url) {
     return methodChannel.invokeMethod<bool>(DuetConst.playSound, url);
   }
 
   @override
-  Future<bool?> saveVideoToAlbum(String path) {
-    return methodChannel.invokeMethod<bool>(DuetConst.saveVideoToAlbum, path);
+  Future<bool?> reset() {
+    return methodChannel.invokeMethod<bool>(DuetConst.reset);
   }
 }
 
@@ -112,14 +96,10 @@ class DuetConst {
   static const String recordDuet = 'RECORD_DUET';
   static const String pauseDuet = 'PAUSE_DUET';
   static const String resumeDuet = 'RESUME_DUET';
-  static const String resetDuet = 'RESET_DUET';
   static const String recordAudio = 'RECORD_AUDIO';
   static const String pauseAudio = 'PAUSE_AUDIO';
-  static const String startCamera = 'START_CAMERA';
-  static const String stopCamera = 'STOP_CAMERA';
-  static const String resetCamera = 'RESET_CAMERA';
   static const String playSound = 'PLAY_SOUND';
-  static const String saveVideoToAlbum = 'SAVE_VIDEO_TO_ALBUM';
+  static const String reset = 'RESET';
 
   // Native call
   static const String audioResult = 'AUDIO_RESULT';
@@ -127,5 +107,6 @@ class DuetConst {
   static const String videoMerged = 'VIDEO_MERGED';
   static const String videoTimer = 'VIDEO_TIMER';
   static const String videoError = 'VIDEO_ERROR';
+  static const String willEnterForeground = 'WILL_ENTER_FOREGROUND';
   static const String alert = 'ALERT';
 }
