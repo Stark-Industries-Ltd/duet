@@ -79,6 +79,9 @@ class _CameraViewState extends State<CameraView> {
         print('onVideoRecorded: $url');
       },
       onTimerVideoReceived: _handleVideoTime,
+      onWillEnterForeground: (_) {
+        print('onWillEnterForeground');
+      },
     );
 
     Future.delayed(const Duration(seconds: 1), () {
