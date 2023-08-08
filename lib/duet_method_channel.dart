@@ -87,8 +87,8 @@ class MethodChannelDuet extends DuetPlatform {
   }
 
   @override
-  Future<bool?> reset() {
-    return methodChannel.invokeMethod<bool>(DuetConst.reset);
+  Future<String?> reset() {
+    return methodChannel.invokeMethod<String>(DuetConst.reset);
   }
 }
 
