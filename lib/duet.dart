@@ -35,5 +35,5 @@ class Duet {
 
   Future<bool?> playSound(String url) => DuetPlatform.instance.playSound(url);
 
-  Future<bool?> reset() => DuetPlatform.instance.reset();
+  Future<String?> reset() => DuetPlatform.instance.reset();
 }

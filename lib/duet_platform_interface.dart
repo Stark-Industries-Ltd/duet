@@ -45,5 +45,5 @@ abstract class DuetPlatform extends PlatformInterface {
 
   Future<bool?> playSound(String url);
 
-  Future<bool?> reset();
+  Future<String?> reset();
 }
