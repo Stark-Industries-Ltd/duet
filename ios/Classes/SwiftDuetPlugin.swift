@@ -9,6 +9,7 @@ enum DuetType: String {
     case pauseAudio  = "PAUSE_AUDIO"
     case playSound  = "PLAY_SOUND"
     case reset = "RESET"
+    case retryMerge = "RETRY_MERGE"
 }
 
 @available(iOS 10.0, *)
@@ -50,6 +51,9 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
             FLNativeView.controller?.playSound(url: url, result: result)
         case DuetType.reset.rawValue:
             FLNativeView.controller?.resetData(result: result)
+        case DuetType.retryMerge.rawValue:
+            let url = (call.arguments as? String) ?? ""
+            FLNativeView.controller?.retryMergeVideo(cameraUrl: url, result: result)
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }

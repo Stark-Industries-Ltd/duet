@@ -205,6 +205,12 @@ extension CameraViewController {
                                         cGSize: CGSize(width: 810, height: 720)
         )
     }
+    
+    func retryMergeVideo(cameraUrl: String, result: @escaping FlutterResult) {
+        let url = URL(fileURLWithPath: cameraUrl)
+        self.mergeVideos(cameraRecordUrl: url)
+        result("")
+    }
 }
 
 extension CameraViewController: CVRecorderDelegate {

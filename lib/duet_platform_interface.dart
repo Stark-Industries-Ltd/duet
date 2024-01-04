@@ -45,5 +45,7 @@ abstract class DuetPlatform extends PlatformInterface {
 
   Future<bool?> playSound(String url);
 
+  Future<String?> retryMerge(String url);
+
   Future<String?> reset();
 }

@@ -87,6 +87,11 @@ class MethodChannelDuet extends DuetPlatform {
   }
 
   @override
+  Future<String?> retryMerge(String url) {
+    return methodChannel.invokeMethod<String>(DuetConst.retryMerge, url);
+  }
+
+  @override
   Future<String?> reset() {
     return methodChannel.invokeMethod<String>(DuetConst.reset);
   }
@@ -99,6 +104,7 @@ class DuetConst {
   static const String recordAudio = 'RECORD_AUDIO';
   static const String pauseAudio = 'PAUSE_AUDIO';
   static const String playSound = 'PLAY_SOUND';
+  static const String retryMerge = 'RETRY_MERGE';
   static const String reset = 'RESET';
 
   // Native call

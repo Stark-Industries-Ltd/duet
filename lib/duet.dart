@@ -35,5 +35,8 @@ class Duet {
 
   Future<bool?> playSound(String url) => DuetPlatform.instance.playSound(url);
 
+  Future<String?> retryMerge(String url) =>
+      DuetPlatform.instance.retryMerge(url);
+
   Future<String?> reset() => DuetPlatform.instance.reset();
 }
