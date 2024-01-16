@@ -11,6 +11,8 @@ typedef OnAudioReceived = Function(String path);
 typedef OnTimerVideoReceived = Function(String timer);
 typedef OnVideoError = Function(String error);
 typedef OnWillEnterForeground = Function(String data);
+typedef OnAudioFinish = Function(String data);
+typedef OnStopAudioPlayer = Function(String data);
 
 /// An implementation of [DuetPlatform] that uses method channels.
 class MethodChannelDuet extends DuetPlatform {
@@ -27,6 +29,8 @@ class MethodChannelDuet extends DuetPlatform {
     OnVideoError? onVideoError,
     OnWillEnterForeground? onWillEnterForeground,
     OnVideoError? onAlert,
+    OnAudioFinish? onAudioFinish,
+    OnStopAudioPlayer? onStopAudioPlayer,
   }) async {
     methodChannel.setMethodCallHandler((call) {
       log(call.method, name: 'DUET_PLUGIN');
@@ -45,6 +49,10 @@ class MethodChannelDuet extends DuetPlatform {
           return onWillEnterForeground?.call(call.arguments);
         case DuetConst.alert:
           return onAlert?.call(call.arguments);
+        case DuetConst.audioFinish:
+          return onAudioFinish?.call(call.arguments);
+        case DuetConst.stopAudioPlayer:
+          return onStopAudioPlayer?.call(call.arguments);
         default:
           return Future(() => null);
       }
@@ -87,6 +95,18 @@ class MethodChannelDuet extends DuetPlatform {
   }
 
   @override
+  Future<bool?> playAudioFromUrl(String path) {
+    return methodChannel.invokeMethod<bool>(DuetConst.playAudioFromUrl, path);
+  }
+
+  @override
+  Future<String?> stopAudioPlayer() {
+    final result =
+        methodChannel.invokeMethod<String>(DuetConst.stopAudioPlayer);
+    return result;
+  }
+
+  @override
   Future<String?> retryMerge(String url) {
     return methodChannel.invokeMethod<String>(DuetConst.retryMerge, url);
   }
@@ -103,6 +123,7 @@ class DuetConst {
   static const String resumeDuet = 'RESUME_DUET';
   static const String recordAudio = 'RECORD_AUDIO';
   static const String pauseAudio = 'PAUSE_AUDIO';
+  static const String playAudioFromUrl = 'PLAY_AUDIO_FROM_URL';
   static const String playSound = 'PLAY_SOUND';
   static const String retryMerge = 'RETRY_MERGE';
   static const String reset = 'RESET';
@@ -115,4 +136,6 @@ class DuetConst {
   static const String videoError = 'VIDEO_ERROR';
   static const String willEnterForeground = 'WILL_ENTER_FOREGROUND';
   static const String alert = 'ALERT';
+  static const String audioFinish = 'AUDIO_FINISH';
+  static const String stopAudioPlayer = 'STOP_AUDIO_PLAYER';
 }

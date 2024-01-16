@@ -11,6 +11,8 @@ class Duet {
     OnVideoError? onVideoError,
     OnWillEnterForeground? onWillEnterForeground,
     OnVideoError? onAlert,
+    OnAudioFinish? onAudioFinish,
+    OnStopAudioPlayer? onStopAudioPlayer,
   }) async {
     return DuetPlatform.instance.onNativeCall(
       onAudioReceived: onAudioReceived,
@@ -20,6 +22,8 @@ class Duet {
       onVideoError: onVideoError,
       onWillEnterForeground: onWillEnterForeground,
       onAlert: onAlert,
+      onAudioFinish: onAudioFinish,
+      onStopAudioPlayer: onStopAudioPlayer,
     );
   }
 
@@ -34,6 +38,11 @@ class Duet {
   Future<String?> pauseAudio() => DuetPlatform.instance.pauseAudio();
 
   Future<bool?> playSound(String url) => DuetPlatform.instance.playSound(url);
+
+  Future<bool?> playAudioFromUrl(String path) =>
+      DuetPlatform.instance.playAudioFromUrl(path);
+
+  Future<String?> stopAudioPlayer() => DuetPlatform.instance.stopAudioPlayer();
 
   Future<String?> retryMerge(String url) =>
       DuetPlatform.instance.retryMerge(url);

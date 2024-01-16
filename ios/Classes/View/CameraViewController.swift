@@ -41,7 +41,7 @@ class CameraViewController: UIViewController {
 
         observer = NotificationCenter.default.addObserver(
             forName: UIApplication.willEnterForegroundNotification,
-            object: nil, queue: .main) { [unowned self] _ in
+            object: nil, queue: .main) { _ in
                 SwiftDuetPlugin.notifyFlutter(event: .WILL_ENTER_FOREGROUND, arguments: "")
             }
     }
@@ -137,6 +137,7 @@ class CameraViewController: UIViewController {
 
         do {
             audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.volume = 1
             audioPlayer?.play()
             result(true)
         } catch let error {
@@ -154,6 +155,39 @@ class CameraViewController: UIViewController {
         cameraView?.stopCapturing { _ in}
         AudioRecorderManager.shared.resetAudio()
 
+        result("")
+    }
+
+    func playAudioFromUrl(path: String, result: @escaping FlutterResult) {
+        guard let url = URL(string: path) else {
+            result(false)
+            return
+        }
+
+        var downloadTask: URLSessionDownloadTask
+        downloadTask = URLSession.shared.downloadTask(with: url,
+                                                      completionHandler: 
+                { [weak self] (url, response, error) -> Void in
+                guard let url = url, let self = self else {
+                    result(false)
+                    return
+                }
+                do {
+                    self.audioPlayer = try AVAudioPlayer(contentsOf: url)
+                    self.audioPlayer?.setVolume(30, fadeDuration: 0)
+                    self.audioPlayer?.delegate = self
+                    self.audioPlayer?.play()
+                    result(true)
+                } catch let error {
+                    result(false)
+                    print(error.localizedDescription)
+                }
+            })
+        downloadTask.resume()
+    }
+
+    func stopAudioPlayer(result: @escaping FlutterResult) {
+        self.audioPlayer?.stop()
         result("")
     }
 }
@@ -240,5 +274,11 @@ extension MPVolumeView {
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.01) {
             slider?.value = volume
         }
+    }
+}
+
+extension CameraViewController: AVAudioPlayerDelegate {
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        SwiftDuetPlugin.notifyFlutter(event: .AUDIO_FINISH, arguments: "")
     }
 }

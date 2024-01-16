@@ -31,6 +31,8 @@ abstract class DuetPlatform extends PlatformInterface {
     OnVideoError? onVideoError,
     OnWillEnterForeground? onWillEnterForeground,
     OnVideoError? onAlert,
+    OnAudioFinish? onAudioFinish,
+    OnStopAudioPlayer? onStopAudioPlayer,
   });
 
   Future<String?> recordDuet();
@@ -44,6 +46,10 @@ abstract class DuetPlatform extends PlatformInterface {
   Future<String?> pauseAudio();
 
   Future<bool?> playSound(String url);
+
+  Future<bool?> playAudioFromUrl(String path);
+
+  Future<String?> stopAudioPlayer();
 
   Future<String?> retryMerge(String url);
 
