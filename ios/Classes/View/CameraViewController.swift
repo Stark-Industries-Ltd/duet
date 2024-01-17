@@ -131,6 +131,7 @@ class CameraViewController: UIViewController {
         guard let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: url),
               let path = Bundle.main.path(forResource: key, ofType: nil) else {
             result(false)
+            SwiftDuetPlugin.notifyFlutter(event: .AUDIO_FINISH, arguments: "")
             return
         }
         let url = URL(fileURLWithPath: path)
@@ -142,6 +143,7 @@ class CameraViewController: UIViewController {
             result(true)
         } catch let error {
             result(false)
+            SwiftDuetPlugin.notifyFlutter(event: .AUDIO_FINISH, arguments: "")
             print(error.localizedDescription)
         }
     }
@@ -174,7 +176,7 @@ class CameraViewController: UIViewController {
                 }
                 do {
                     self.audioPlayer = try AVAudioPlayer(contentsOf: url)
-                    self.audioPlayer?.setVolume(30, fadeDuration: 0)
+                    self.audioPlayer?.volume = 10
                     self.audioPlayer?.delegate = self
                     self.audioPlayer?.play()
                     result(true)
