@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:duet/duet.dart';
 import 'package:duet/duet_view.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +66,9 @@ class _CameraViewState extends State<CameraView> {
       'https://dphw5vqyyotoi.cloudfront.net/upload/5c209fe6176b0/2023/05/05/dd92_manhdz.mp4';
   final _duetPlugin = Duet();
   String _recordFilePath = '';
+
+// ...
+  final player = AudioPlayer();
 
   @override
   void initState() {
@@ -146,6 +150,22 @@ class _CameraViewState extends State<CameraView> {
 
               Future.delayed(const Duration(seconds: 4), () {
                 _duetPlugin.recordDuet();
+                Future.delayed(const Duration(seconds: 2), () {
+                  player.play(
+                    UrlSource(
+                      'https://onlinetestcase.com/wp-content/uploads/2023/06/1-MB-MP3.mp3',
+                    ),
+                  );
+                  Future.delayed(const Duration(seconds: 4), () {
+                    player.dispose();
+                    _duetPlugin.playAudioFromUrl(
+                      'https://github.com/rafaelreis-hotmart/Audio-Sample-files/raw/master/sample.mp3',
+                    );
+                    Future.delayed(const Duration(seconds: 1), () {
+                      _duetPlugin.stopAudioPlayer();
+                    });
+                  });
+                });
               });
             },
             child: const Text('Record'),
@@ -182,6 +202,7 @@ class _PlayVideosScreenState extends State<PlayVideosScreen> {
   late VideoPlayerController controller1, controller2;
   final url =
       'https://dphw5vqyyotoi.cloudfront.net/upload/5c209fe6176b0/2023/05/05/dd92_manhdz.mp4';
+
   @override
   void initState() {
     super.initState();
