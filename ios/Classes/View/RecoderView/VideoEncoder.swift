@@ -9,6 +9,7 @@ import Foundation
 import AVFoundation
 import Photos
 
+@available(iOS 13.0, *)
 class VideoEncoder {
     let path: URL
     private let _writer: AVAssetWriter!

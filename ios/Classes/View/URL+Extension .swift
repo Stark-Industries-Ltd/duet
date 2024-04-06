@@ -10,6 +10,7 @@ import AVFoundation
 import AVKit
 import Photos
 
+@available(iOS 13.0, *)
 extension URL {
 
     func gridMergeVideos(duetViewArgs: DuetViewArgs,

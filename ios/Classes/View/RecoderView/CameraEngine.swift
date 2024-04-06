@@ -11,6 +11,7 @@ import AssetsLibrary
 import Photos
 import Vision
 
+@available(iOS 13.0, *)
 class CameraEngine: NSObject {
 
     private var session: AVCaptureSession?
@@ -203,6 +204,7 @@ class CameraEngine: NSObject {
     }
 }
 
+@available(iOS 13.0, *)
 extension CameraEngine: AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
 
     func adjustTime(sampleBuffer: CMSampleBuffer, by offset: CMTime) -> CMSampleBuffer? {

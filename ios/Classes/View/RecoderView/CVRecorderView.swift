@@ -16,12 +16,14 @@ public enum RecorderState: Int {
     case NotReady
 }
 
+@available(iOS 13.0, *)
 protocol VideoCaptureDelegate: AnyObject {
     func videoCapture(_ capture: CVRecorderView, didCaptureVideoFrame: CVPixelBuffer?, timestamp: CMTime)
     func videoCaptureDidChangedCamera(currentCameraPosition: AVCaptureDevice.Position)
     func videoCaptureStateDidChanged(_ currentState: RecorderState)
 }
 
+@available(iOS 13.0, *)
 class CVRecorderView: UIView, AVAudioRecorderDelegate {
     fileprivate lazy var cameraSession = AVCaptureSession()
     fileprivate lazy var videoDataOutput = AVCaptureVideoDataOutput()
@@ -165,6 +167,7 @@ class CVRecorderView: UIView, AVAudioRecorderDelegate {
     }
 }
 
+@available(iOS 13.0, *)
 extension CVRecorderView {
 
     func cameraWithPosition(position: AVCaptureDevice.Position) -> AVCaptureDevice? {
@@ -179,6 +182,7 @@ extension CVRecorderView {
 }
 
 
+@available(iOS 13.0, *)
 extension CVRecorderView {
     fileprivate func canWrite() -> Bool {
         return recorderState == .Recording
@@ -187,6 +191,7 @@ extension CVRecorderView {
     }
 }
 
+@available(iOS 13.0, *)
 extension CVRecorderView : AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate{
 
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {

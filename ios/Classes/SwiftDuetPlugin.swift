@@ -14,7 +14,7 @@ enum DuetType: String {
     case retryMerge = "RETRY_MERGE"
 }
 
-@available(iOS 10.0, *)
+@available(iOS 13.0, *)
 public class SwiftDuetPlugin: NSObject, FlutterPlugin {
     static var channel: FlutterMethodChannel?
     static var registrar: FlutterPluginRegistrar?
@@ -30,6 +30,7 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(SwiftDuetPlugin(), channel: channel!)
     }
 
+    @available(iOS 13.0, *)
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         print(call.method)
         switch(call.method){
