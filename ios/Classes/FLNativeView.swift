@@ -31,7 +31,7 @@ class FLNativeViewFactory: NSObject, FlutterPlatformViewFactory {
 
 @available(iOS 10.0, *)
 class FLNativeView: NSObject, FlutterPlatformView {
-    var controller: CameraViewController?
+    var controller: UIViewController?
 
     init(
         frame: CGRect,
@@ -47,18 +47,32 @@ class FLNativeView: NSObject, FlutterPlatformView {
         } catch {
             let message = "FLNativeView init \(error)"
             print(message)
-            SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
+            if #available(iOS 13.0, *) {
+                SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: message)
+            } else {
+                // Fallback on earlier versions
+            }
         }
-
-        let storyboard = UIStoryboard.init(name: "Camera", bundle: Bundle.init(for: CameraViewController.self))
-        self.controller = storyboard.instantiateViewController(withIdentifier: "CameraID") as? CameraViewController
-        self.controller?.viewArgs = viewArgs
+        
+        if #available(iOS 13.0, *) {
+            let storyboard = UIStoryboard.init(name: "Camera", bundle: Bundle.init(for: CameraViewController.self))
+            let controller = storyboard.instantiateViewController(withIdentifier: "CameraID") as! CameraViewController
+            controller.viewArgs = viewArgs
+            self.controller = controller
+        } else {
+            // Fallback on earlier versions
+        }
+        
         
         super.init()
     }
 
     func view() -> UIView {
-        return controller!.view
+        if #available(iOS 13.0, *) {
+            return controller!.view
+        } else {
+            return UIView()
+        }
     }
 }
 
