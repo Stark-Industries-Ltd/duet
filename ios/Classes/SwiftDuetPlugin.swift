@@ -14,7 +14,7 @@ enum DuetType: String {
     case retryMerge = "RETRY_MERGE"
 }
 
-@available(iOS 10.0, *)
+@available(iOS 13.0, *)
 public class SwiftDuetPlugin: NSObject, FlutterPlugin {
     var channel: FlutterMethodChannel?
     var registrar: FlutterPluginRegistrar?
@@ -33,6 +33,7 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance!, channel: instance!.channel!)
     }
 
+    @available(iOS 13.0, *)
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         print(call.method)
         switch(call.method){
@@ -40,7 +41,7 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
            delegate?.startRecording()
             result("")
         case DuetType.pauseDuet.rawValue:
-           delegate?.pauseRecording()
+           delegate?.pauseRecording(result: result)
             result("")
         case DuetType.resumeDuet.rawValue:
            delegate?.resumeRecording()

@@ -9,6 +9,7 @@ import Foundation
 import AVFAudio
 import AVFoundation
 
+@available(iOS 13.0, *)
 class AudioRecorder: NSObject, AVAudioRecorderDelegate {
     private let audioEngine = AVAudioEngine()
 

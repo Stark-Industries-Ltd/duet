@@ -8,6 +8,7 @@
 import Foundation
 import AVFAudio
 
+@available(iOS 13.0, *)
 class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
 
     var audioRecorder: AVAudioRecorder?
