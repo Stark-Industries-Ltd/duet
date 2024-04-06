@@ -13,6 +13,7 @@ public protocol CVRecorderDelegate: AnyObject {
     func didChangedRecorderState(_ currentRecorderState:  RecorderState)
 }
 
+@available(iOS 13.0, *)
 public class CVRecorder {
     private weak var delegate: CVRecorderDelegate?
     private var recoderView: CVRecorderView!
@@ -21,6 +22,7 @@ public class CVRecorder {
         self.delegate = delegate
     }
 }
+@available(iOS 13.0, *)
 
 extension CVRecorder: VideoCaptureDelegate {
     func videoCaptureDidChangedCamera(currentCameraPosition: AVCaptureDevice.Position) {

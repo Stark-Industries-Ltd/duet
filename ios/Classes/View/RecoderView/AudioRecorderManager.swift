@@ -8,6 +8,7 @@
 import Foundation
 import AVFAudio
 
+@available(iOS 13.0, *)
 class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
 
     static let shared = AudioRecorderManager()
@@ -35,7 +36,8 @@ class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
     private func setAudio() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
+            try session.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .mixWithOthers, .interruptSpokenAudioAndMixWithOthers, .duckOthers])
+//             try session.setCategory(.playAndRecord, mode: .videoRecording, options: [.allowBluetooth, .allowBluetoothA2DP, .mixWithOthers])
             try session.setActive(true)
         } catch let error {
             let message = "AudioRecorderManager session \(error)"

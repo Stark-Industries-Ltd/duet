@@ -9,7 +9,9 @@ import UIKit
 import AVFoundation
 import Photos
 import MediaPlayer
+import Combine
 
+@available(iOS 13.0, *)
 class CameraViewController: UIViewController {
 
     //IBOutlets
@@ -30,6 +32,8 @@ class CameraViewController: UIViewController {
     private var timeObserver: Any?
     private var observer: NSObjectProtocol?
 
+    private var cancelBag: Set<AnyCancellable> = []
+
     override func viewDidLoad() {
         super.viewDidLoad()
         cameraView = CameraEngine()
@@ -47,9 +51,19 @@ class CameraViewController: UIViewController {
     }
 
     deinit {
+        SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: "Duet deinit")
+        cancelBag.removeAll()
         if let observer = observer {
             NotificationCenter.default.removeObserver(observer)
         }
+        if let timeObserver = timeObserver {
+            NotificationCenter.default.removeObserver(timeObserver)
+        }
+        self.player?.pause();
+        cameraView?.stopCapturing({ URL in
+            print("Stop capturing")
+        }) // Dừng camera
+        cameraView = nil // Giải phóng camera
     }
 
     private func loadImageBackground() {
@@ -73,8 +87,8 @@ class CameraViewController: UIViewController {
 
         self.player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
 
-        let interval = CMTime(value: 1, timescale: 2)
-
+        let interval = CMTime(value: 1, timescale: 3)
+        
         timeObserver = self.player?.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) {[weak self] progressTime in
             guard let self = self else {
                 return
@@ -82,14 +96,20 @@ class CameraViewController: UIViewController {
             let seconds = CMTimeGetSeconds(progressTime)
             if seconds > 0 {
                 SwiftDuetPlugin.notifyFlutter(event: .VIDEO_TIMER, arguments: "\(seconds)")
-                print(seconds)
             }
 
-            if durationTime == seconds {
-                self.player?.seek(to: CMTime.zero)
-                self.finishRecording()
+            // Xử lý case seconds dừng ở 90.35693333333333, trong khi durationTime = 90.38933333333334
+            if durationTime - 0.2 <= seconds {
+                self.playerItemDidReachEnd()
             }
         }
+        
+        // Xử lý case seconds dừng ở 90.35693333333333, trong khi durationTime = 90.38933333333334
+        NotificationCenter.default.publisher(for: .AVPlayerItemDidPlayToEndTime)
+        .sink { _ in
+            self.playerItemDidReachEnd()
+        }
+        .store(in: &cancelBag)
 
         AudioRecorderManager.shared.initAudio()
 
@@ -106,6 +126,13 @@ class CameraViewController: UIViewController {
         heightContraintVideo.constant = height
 
         self.videoView.layer.addSublayer(playerLayer)
+    }
+    
+    func playerItemDidReachEnd() {
+        self.player?.seek(to: CMTime.zero)
+        self.player?.pause()
+        SwiftDuetPlugin.notifyFlutter(event: .ALERT, arguments: "flutter finishRecording")
+        self.finishRecording()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -194,6 +221,7 @@ class CameraViewController: UIViewController {
     }
 }
 
+@available(iOS 13.0, *)
 extension CameraViewController {
     func startRecordingAudio() {
         AudioRecorderManager.shared.startRecording()
@@ -204,6 +232,7 @@ extension CameraViewController {
     }
 }
 
+@available(iOS 13.0, *)
 extension CameraViewController {
 
     func startRecording() {
@@ -249,6 +278,7 @@ extension CameraViewController {
     }
 }
 
+@available(iOS 13.0, *)
 extension CameraViewController: CVRecorderDelegate {
     func didChangedCamera(_ currentCameraPosition: AVCaptureDevice.Position) {
         switch currentCameraPosition {
@@ -279,6 +309,7 @@ extension MPVolumeView {
     }
 }
 
+@available(iOS 13.0, *)
 extension CameraViewController: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         SwiftDuetPlugin.notifyFlutter(event: .AUDIO_FINISH, arguments: "")
