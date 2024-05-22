@@ -1,0 +1,29 @@
+// cURL Cập nhật trạng thái kỹ năng
+curl --location 'https://omo-api.vuihoc.vn/api/tutor-skills/status' \
+--header 'device-id: B79ECBD4-8FC7-4584-BF2C-1CC5937B091D' \
+--header 'app-id: 1' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUzMTE4Miwic2Nob29sSWQiOjI1NSwiaWF0IjoxNzE2MzUyNTc5LCJleHAiOjE3NDc4ODg1Nzl9.-SKO9HwOfcXo3mUvne5TKCerBLIVkM1ilKQQZaT__nQ' \
+--data '{
+    "lesson_id": 2295267,
+    "section_id": 4,
+    "skill_id": [
+        3
+    ],
+    "status": 2
+}'
+
+
+// cURL Submit audio duet để chấm điểm
+curl --location 'https://omo-api.vuihoc.vn/api/duet/submit' \
+--header 'device-id: B79ECBD4-8FC7-4584-BF2C-1CC5937B091D' \
+--header 'app-id: 1' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTUzMTE4Miwic2Nob29sSWQiOjI1NSwiaWF0IjoxNzE2MzUyNTc5LCJleHAiOjE3NDc4ODg1Nzl9.-SKO9HwOfcXo3mUvne5TKCerBLIVkM1ilKQQZaT__nQ' \
+--form 'audio=@"/Users/hautran/Downloads/recording.aac"' \
+--form 'lesson_section_id="4"' \
+--form 'lesson_id="2295267"' \
+--form 'class_id="20278"' \
+--form 'remain_time="500"' \
+--form 'skill_id="3"' \
+--form 'duet_video_id="305"'
+
