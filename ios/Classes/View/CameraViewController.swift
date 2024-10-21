@@ -10,8 +10,21 @@ import AVFoundation
 import Photos
 import MediaPlayer
 
-class CameraViewController: UIViewController {
+protocol DuetProtocol: AnyObject {
+    func startRecordingAudio()
+    func pauseRecordingAudio()
+    func startRecording()
+    func pauseRecording()
+    func resumeRecording()
+    func playSound(url: String, result: @escaping FlutterResult)
+    func playAudioFromUrl(path: String, result: @escaping FlutterResult)
+    func stopAudioPlayer(result: @escaping FlutterResult)
+    func resetData(result: @escaping FlutterResult) 
+    func retryMergeVideo(cameraUrl: String, result: @escaping FlutterResult)
+}
 
+class CameraViewController: UIViewController {
+    let defaultVolume: Float = 0.5
     //IBOutlets
     @IBOutlet weak var videoView: UIView!
     @IBOutlet weak var cameraPreviewContainer: UIView!
@@ -29,24 +42,28 @@ class CameraViewController: UIViewController {
     private var isObjectDetectionEnabled = false
     private var timeObserver: Any?
     private var observer: NSObjectProtocol?
-
+    private let audioRecorderManager = AudioRecorderManager()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         cameraView = CameraEngine()
         configData()
         loadImageBackground()
-
+        
         //Update system volume
-        MPVolumeView.setVolume(0.5)
-
+        MPVolumeView.setVolume(defaultVolume)
+        debugPrint("viewDidLoad")
         observer = NotificationCenter.default.addObserver(
             forName: UIApplication.willEnterForegroundNotification,
             object: nil, queue: .main) { _ in
                 SwiftDuetPlugin.notifyFlutter(event: .WILL_ENTER_FOREGROUND, arguments: "")
             }
+        
+        SwiftDuetPlugin.instance?.delegate = self
     }
 
     deinit {
+        debugPrint("deinit camera")
         if let observer = observer {
             NotificationCenter.default.removeObserver(observer)
         }
@@ -54,7 +71,7 @@ class CameraViewController: UIViewController {
 
     private func loadImageBackground() {
         guard let image = viewArgs?.image,
-              let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: image),
+              let key = SwiftDuetPlugin.instance?.registrar?.lookupKey(forAsset: image),
               let path = Bundle.main.path(forResource: key, ofType: nil) else {
             print("load image error")
             return
@@ -91,7 +108,7 @@ class CameraViewController: UIViewController {
             }
         }
 
-        AudioRecorderManager.shared.initAudio()
+        audioRecorderManager.initAudio()
 
         let playerLayer = AVPlayerLayer(player: player)
 
@@ -124,11 +141,40 @@ class CameraViewController: UIViewController {
         player = nil
         cameraView?.stopSession()
         cameraView = nil
-        AudioRecorderManager.shared.resetAudio()
+        audioRecorderManager.resetAudio()
     }
 
+    
+
+    
+}
+
+extension CameraViewController: DuetProtocol {
+    func startRecordingAudio() {
+        audioRecorderManager.startRecording()
+    }
+
+    func pauseRecordingAudio() {
+        audioRecorderManager.pauseRecording()
+    }
+    
+    func startRecording() {
+        player?.play()
+        cameraView?.startCapture()
+    }
+
+    func pauseRecording() {
+        player?.pause()
+        cameraView?.pauseCapture()
+    }
+
+    func resumeRecording() {
+        player?.play()
+        cameraView?.resumeCapture()
+    }
+    
     func playSound(url: String, result: @escaping FlutterResult) {
-        guard let key = SwiftDuetPlugin.registrar?.lookupKey(forAsset: url),
+        guard let key = SwiftDuetPlugin.instance?.registrar?.lookupKey(forAsset: url),
               let path = Bundle.main.path(forResource: key, ofType: nil) else {
             result(false)
             SwiftDuetPlugin.notifyFlutter(event: .AUDIO_FINISH, arguments: "")
@@ -147,19 +193,7 @@ class CameraViewController: UIViewController {
             print(error.localizedDescription)
         }
     }
-
-    func resetData(result: @escaping FlutterResult) {
-        //Update system volume
-        MPVolumeView.setVolume(0.5)
-
-        player?.pause()
-        player?.seek(to: CMTime.zero)
-        cameraView?.stopCapturing { _ in}
-        AudioRecorderManager.shared.resetAudio()
-
-        result("")
-    }
-
+    
     func playAudioFromUrl(path: String, result: @escaping FlutterResult) {
         guard let url = URL(string: path) else {
             result(false)
@@ -168,7 +202,7 @@ class CameraViewController: UIViewController {
 
         var downloadTask: URLSessionDownloadTask
         downloadTask = URLSession.shared.downloadTask(with: url,
-                                                      completionHandler: 
+                                                      completionHandler:
                 { [weak self] (url, response, error) -> Void in
                 guard let url = url, let self = self else {
                     result(false)
@@ -192,35 +226,27 @@ class CameraViewController: UIViewController {
         self.audioPlayer?.stop()
         result("")
     }
-}
+    
+    func resetData(result: @escaping FlutterResult) {
+        //Update system volume
+        MPVolumeView.setVolume(defaultVolume)
 
-extension CameraViewController {
-    func startRecordingAudio() {
-        AudioRecorderManager.shared.startRecording()
-    }
-
-    func pauseRecordingAudio() {
-        AudioRecorderManager.shared.pauseRecording()
-    }
-}
-
-extension CameraViewController {
-
-    func startRecording() {
-        player?.play()
-        cameraView?.startCapture()
-    }
-
-    func pauseRecording() {
         player?.pause()
-        cameraView?.pauseCapture()
-    }
+        player?.seek(to: CMTime.zero)
+        cameraView?.stopCapturing { _ in}
+        audioRecorderManager.resetAudio()
 
-    func resumeRecording() {
-        player?.play()
-        cameraView?.resumeCapture()
+        result("")
     }
+    
+    func retryMergeVideo(cameraUrl: String, result: @escaping FlutterResult) {
+        let url = URL(fileURLWithPath: cameraUrl)
+        self.mergeVideos(cameraRecordUrl: url)
+        result("")
+    }
+}
 
+extension CameraViewController {
     private func finishRecording() {
         cameraView?.stopCapturing { [weak self] cameraRecordUrl in
             SwiftDuetPlugin.notifyFlutter(event: .VIDEO_RECORDED, arguments: cameraRecordUrl.path)
@@ -230,7 +256,7 @@ extension CameraViewController {
             self.mergeVideos(cameraRecordUrl: cameraRecordUrl)
         }
 
-        AudioRecorderManager.shared.finishRecording { url in
+        audioRecorderManager.finishRecording { url in
             SwiftDuetPlugin.notifyFlutter(event: .AUDIO_RESULT, arguments: url.path)
         }
     }
@@ -240,12 +266,6 @@ extension CameraViewController {
         cameraRecordUrl.gridMergeVideos(duetViewArgs: duetViewArgs, urlVideo: videoUrl,
                                         cGSize: CGSize(width: 810, height: 720)
         )
-    }
-    
-    func retryMergeVideo(cameraUrl: String, result: @escaping FlutterResult) {
-        let url = URL(fileURLWithPath: cameraUrl)
-        self.mergeVideos(cameraRecordUrl: url)
-        result("")
     }
 }
 

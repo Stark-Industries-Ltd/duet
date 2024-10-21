@@ -31,7 +31,7 @@ class FLNativeViewFactory: NSObject, FlutterPlatformViewFactory {
 
 @available(iOS 10.0, *)
 class FLNativeView: NSObject, FlutterPlatformView {
-    static var controller: CameraViewController?
+    var controller: CameraViewController?
 
     init(
         frame: CGRect,
@@ -51,16 +51,14 @@ class FLNativeView: NSObject, FlutterPlatformView {
         }
 
         let storyboard = UIStoryboard.init(name: "Camera", bundle: Bundle.init(for: CameraViewController.self))
-        let controller = storyboard.instantiateViewController(withIdentifier: "CameraID") as! CameraViewController
-        
-        controller.viewArgs = viewArgs
-        FLNativeView.controller = controller
+        self.controller = storyboard.instantiateViewController(withIdentifier: "CameraID") as? CameraViewController
+        self.controller?.viewArgs = viewArgs
         
         super.init()
     }
 
     func view() -> UIView {
-        return FLNativeView.controller!.view
+        return controller!.view
     }
 }
 
