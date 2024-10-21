@@ -16,58 +16,61 @@ enum DuetType: String {
 
 @available(iOS 10.0, *)
 public class SwiftDuetPlugin: NSObject, FlutterPlugin {
-    static var channel: FlutterMethodChannel?
-    static var registrar: FlutterPluginRegistrar?
+    var channel: FlutterMethodChannel?
+    var registrar: FlutterPluginRegistrar?
+    static var instance: SwiftDuetPlugin?
+    weak var delegate: DuetProtocol?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
 
         let factory = FLNativeViewFactory(messenger: registrar.messenger())
 
         registrar.register(factory, withId: "<platform-view-type>")
-
-        self.channel = FlutterMethodChannel(name: "duet", binaryMessenger: registrar.messenger())
-        self.registrar = registrar
-        registrar.addMethodCallDelegate(SwiftDuetPlugin(), channel: channel!)
+        instance = SwiftDuetPlugin()
+        instance!.channel = FlutterMethodChannel(name: "duet", binaryMessenger: registrar.messenger())
+        instance!.registrar = registrar
+        
+        registrar.addMethodCallDelegate(instance!, channel: instance!.channel!)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         print(call.method)
         switch(call.method){
         case DuetType.recordDuet.rawValue:
-            FLNativeView.controller?.startRecording()
+           delegate?.startRecording()
             result("")
         case DuetType.pauseDuet.rawValue:
-            FLNativeView.controller?.pauseRecording()
+           delegate?.pauseRecording()
             result("")
         case DuetType.resumeDuet.rawValue:
-            FLNativeView.controller?.resumeRecording()
+           delegate?.resumeRecording()
             result("")
         case DuetType.recordAudio.rawValue:
-            FLNativeView.controller?.startRecordingAudio()
+           delegate?.startRecordingAudio()
             result("")
         case DuetType.pauseAudio.rawValue:
-            FLNativeView.controller?.pauseRecordingAudio()
+           delegate?.pauseRecordingAudio()
             result("")
         case DuetType.playSound.rawValue:
             let url = (call.arguments as? String) ?? ""
-            FLNativeView.controller?.playSound(url: url, result: result)
+           delegate?.playSound(url: url, result: result)
         case DuetType.playAudioFromUrl.rawValue:
             let path = (call.arguments as? String) ?? ""
-            FLNativeView.controller?.playAudioFromUrl(path: path, result: result)
+           delegate?.playAudioFromUrl(path: path, result: result)
         case DuetType.stopAudioPlayer.rawValue:
-            FLNativeView.controller?.stopAudioPlayer(result: result)
+           delegate?.stopAudioPlayer(result: result)
         case DuetType.reset.rawValue:
-            FLNativeView.controller?.resetData(result: result)
+           delegate?.resetData(result: result)
         case DuetType.retryMerge.rawValue:
             let url = (call.arguments as? String) ?? ""
-            FLNativeView.controller?.retryMergeVideo(cameraUrl: url, result: result)
+           delegate?.retryMergeVideo(cameraUrl: url, result: result)
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
     }
 
     public static func notifyFlutter(event: EventType, arguments: Any?) {
-        SwiftDuetPlugin.channel?.invokeMethod(event.rawValue, arguments: arguments)
+        SwiftDuetPlugin.instance?.channel?.invokeMethod(event.rawValue, arguments: arguments)
     }
 }
 

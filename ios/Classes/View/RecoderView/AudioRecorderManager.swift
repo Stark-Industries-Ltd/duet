@@ -10,7 +10,6 @@ import AVFAudio
 
 class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
 
-    static let shared = AudioRecorderManager()
     var audioRecorder: AVAudioRecorder?
 
     private let settings = [
