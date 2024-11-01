@@ -254,6 +254,11 @@ extension CameraViewController: DuetProtocol {
     func resetData(result: @escaping FlutterResult) {
         //Update system volume
         MPVolumeView.setVolume(defaultVolume)
+        player?.pause()
+        player?.seek(to: CMTime.zero)
+        cameraView?.stopCapturing { _ in}
+        audioRecorderManager.resetAudio()
+        result("")
     }
 
     func pauseRecording() {
