@@ -41,7 +41,7 @@ public class SwiftDuetPlugin: NSObject, FlutterPlugin {
            delegate?.startRecording()
             result("")
         case DuetType.pauseDuet.rawValue:
-           delegate?.pauseRecording(result: result)
+           delegate?.pauseRecording()
             result("")
         case DuetType.resumeDuet.rawValue:
            delegate?.resumeRecording()
