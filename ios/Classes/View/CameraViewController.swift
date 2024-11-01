@@ -15,7 +15,7 @@ protocol DuetProtocol: AnyObject {
     func startRecordingAudio()
     func pauseRecordingAudio()
     func startRecording()
-    func pauseRecording(result: @escaping FlutterResult)
+    func pauseRecording()
     func resumeRecording()
     func playSound(url: String, result: @escaping FlutterResult)
     func playAudioFromUrl(path: String, result: @escaping FlutterResult)
@@ -256,13 +256,9 @@ extension CameraViewController: DuetProtocol {
         MPVolumeView.setVolume(defaultVolume)
     }
 
-    func pauseRecording(result: @escaping FlutterResult) {
+    func pauseRecording() {
         player?.pause()
-        player?.seek(to: CMTime.zero)
-        cameraView?.stopCapturing { _ in}
-        audioRecorderManager.resetAudio()
-
-        result("")
+        cameraView?.pauseCapture()
     }
     
     func retryMergeVideo(cameraUrl: String, result: @escaping FlutterResult) {
